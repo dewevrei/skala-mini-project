@@ -24,6 +24,14 @@ export const apiClient = axios.create({
   headers: { Accept: 'application/json' },
 })
 
+// Feature APIs that need to surface the server's success message use this
+// client. The existing apiClient keeps returning only `data` for auth callers.
+export const apiEnvelopeClient = axios.create({
+  baseURL: `${API_ORIGIN}/api/v1`,
+  withCredentials: true,
+  headers: { Accept: 'application/json' },
+})
+
 let csrf = null
 let csrfRequest = null
 let authenticationFailureHandler = null
@@ -64,11 +72,33 @@ apiClient.interceptors.request.use(async (config) => {
   return config
 })
 
+apiEnvelopeClient.interceptors.request.use(async (config) => {
+  if (STATE_CHANGING.has(config.method?.toLowerCase())) {
+    const token = await ensureCsrfToken()
+    config.headers[token.headerName] = token.token
+  }
+  return config
+})
+
 apiClient.interceptors.response.use(
   (response) => {
     const envelope = response.data
     if (!envelope?.success) throw new ApiError(envelope, response.status)
     return envelope.data
+  },
+  (error) => {
+    const apiError = new ApiError(error.response?.data, error.response?.status)
+    if (apiError.code === 'CSRF_TOKEN_INVALID') clearCsrfToken()
+    if (apiError.code === 'AUTHENTICATION_REQUIRED') authenticationFailureHandler?.(apiError)
+    return Promise.reject(apiError)
+  },
+)
+
+apiEnvelopeClient.interceptors.response.use(
+  (response) => {
+    const envelope = response.data
+    if (!envelope?.success) throw new ApiError(envelope, response.status)
+    return envelope
   },
   (error) => {
     const apiError = new ApiError(error.response?.data, error.response?.status)
