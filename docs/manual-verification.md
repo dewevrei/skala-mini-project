@@ -51,12 +51,12 @@ Frontend build에는 의존성의 `/* #__PURE__ */` 주석 제거 안내와 500 
 1. MySQL Workbench에서 `database/ai_kanban.sql`을 사용자가 직접 실행한다. 애플리케이션이 DDL을 실행하게 하지 않는다.
 2. 새 terminal/session에 `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`를 주입한다. 값은 문서나 Git에 남기지 않는다.
 3. Redis와 나머지 필수 환경 변수를 준비한 뒤 `backend\.\mvnw.cmd spring-boot:run`을 실행한다.
-4. Hibernate schema validation 성공과 서버 기동을 확인하고 `GET http://localhost:8080/api/v1/auth/csrf`가 `200 CSRF_TOKEN_ISSUED`인지 확인한다.
+4. Hibernate schema validation 성공과 서버 기동을 확인하고 `GET http://localhost:18080/api/v1/auth/csrf`가 `200 CSRF_TOKEN_ISSUED`인지 확인한다.
 5. 별도 임시 schema에서 의도적으로 column/nullability를 다르게 만든 뒤 해당 DB를 가리켜 시작이 실패하는지 확인하고, 검증 후 임시 schema만 제거한다.
 
 ### PENDING — Google OAuth callback/redirect
 
-필요 환경: Google OAuth client, 승인된 redirect URI `http://localhost:8080/login/oauth2/code/google`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, 실행 중인 Backend/Frontend/MySQL/Redis.
+필요 환경: Google OAuth client, 승인된 redirect URI `http://localhost:18080/login/oauth2/code/google`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, 실행 중인 Backend/Frontend/MySQL/Redis.
 
 1. `/oauth2/authorization/google`에서 로그인하고 callback 후 `http://localhost:5173/projects`로 이동하는지 확인한다.
 2. OAuth 승인을 취소하거나 유효하지 않은 callback을 사용해 `/login?error=oauth`를 확인한다.

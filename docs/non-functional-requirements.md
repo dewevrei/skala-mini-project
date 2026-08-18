@@ -21,7 +21,7 @@
 | REQ-NFN-012 | 정렬 결정성 | 열은 `sortOrder, id`, 카드는 `sortOrder, id` 순으로 조회해 동률에도 결과가 결정적이어야 한다. | 필수 | 중간 | 이동 후 순번 정규화 가능 |
 | REQ-NFN-013 | AI 장애 내성 | AI 호출·응답 검증 실패가 일반 작업 등록 기능 전체의 장애로 번지지 않도록 확정된 대체 저장을 수행한다. | 필수 | 높음 | DB 저장 실패는 대체 대상 아님 |
 | REQ-NFN-014 | API 일관성 | OAuth 리다이렉트 외 JSON API는 동일한 `ApiResponse<T>` 봉투와 의미에 맞는 HTTP 상태 코드를 사용한다. | 필수 | 중간 | 오류 `data`는 항상 `null` |
-| REQ-NFN-015 | 로컬 실행 환경 | MVP는 Frontend `localhost:5173`, Backend `localhost:8080`, MySQL host `localhost:13306`(container `3306`), Redis `localhost:6379` 기본 구성을 대상으로 한다. | 필수 | 낮음 | 연결값은 환경 설정으로 주입 가능 |
+| REQ-NFN-015 | 로컬 실행 환경 | MVP는 Frontend `localhost:5173`, Backend `localhost:18080`, MySQL host `localhost:13306`(container `3306`), Redis `localhost:6379` 기본 구성을 대상으로 한다. | 필수 | 낮음 | 연결값은 환경 설정으로 주입 가능 |
 | REQ-NFN-016 | 프런트엔드 검증 | 프런트엔드는 프로덕션 빌드가 성공해야 한다. 자동 단위·컴포넌트·브라우저 테스트는 작성하지 않는다. | 필수 | 낮음 | `npm run build` |
 | REQ-NFN-017 | 백엔드 검증 | 백엔드는 서비스 메서드 단위 테스트만 작성하고 통과시켜야 한다. 컨트롤러·보안·DB 연동 자동 테스트는 범위 밖이다. | 필수 | 중간 | `./mvnw test` |
 | REQ-NFN-018 | 외부 API 테스트 격리 | 서비스 단위 테스트에서 Google OAuth와 Gemini를 실제 호출하지 않고 테스트 대역을 사용한다. | 필수 | 중간 | 비용·불안정성 차단 |

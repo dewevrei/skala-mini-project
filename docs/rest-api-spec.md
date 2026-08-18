@@ -1,7 +1,7 @@
 # REST API Specification
 
 문서 상태: 구현 계약 확정본  
-Base URL: `http://localhost:8080/api/v1`  
+Base URL: `http://localhost:18080/api/v1`
 Content-Type: `application/json`  
 인증: Google OAuth 2.0 + 서버 세션 쿠키
 
