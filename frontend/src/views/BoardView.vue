@@ -284,7 +284,12 @@ function clearDrag() {
                 @dragend="clearDrag"
               >⋮⋮</button>
             </header>
-            <div class="board-column__tasks">
+            <div
+              class="board-column__tasks"
+              :class="{ 'board-column__tasks--drop-target': dragging.kind === 'task' && !movePending }"
+              @dragover="allowDrop($event, 'task')"
+              @drop="dropTask(group.column.id, null)"
+            >
               <template v-for="task in group.tasks" :key="task.id">
                 <div class="task-drop-zone" @dragover="allowDrop($event, 'task')" @drop="dropTask(group.column.id, task.id)" />
                 <button
@@ -357,7 +362,7 @@ function clearDrag() {
 .board-columns { display: flex; align-items: flex-start; min-width: max-content; }
 .column-drop-zone { width: 12px; min-height: 620px; border-radius: 6px; transition: background .15s; }
 .column-drop-zone:hover { background: #ddf4ff; }
-.board-column { width: 344px; min-height: calc(100vh - 250px); border: 1px solid #d0d7de; border-radius: 10px; background: #f6f8fa; }
+.board-column { width: 344px; min-height: calc(100vh - 250px); display: flex; flex-direction: column; border: 1px solid #d0d7de; border-radius: 10px; background: #f6f8fa; }
 .board-column__header { min-height: 62px; padding: 14px 12px 12px 16px; display: flex; align-items: center; gap: 9px; }
 .board-column__marker { width: 20px; height: 20px; border: 3px solid #43853d; border-radius: 50%; background: #dafbe1; }
 .board-column__header h2 { flex: 1; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; }
@@ -366,7 +371,8 @@ function clearDrag() {
 .icon-button:hover, .column-drag-handle:hover { background: #eaeef2; color: #1f2328; }
 .column-drag-handle { cursor: grab; font-size: 15px; letter-spacing: -3px; }
 .column-drag-handle:active { cursor: grabbing; }
-.board-column__tasks { padding: 0 12px 12px; }
+.board-column__tasks { min-height: 180px; flex: 1; padding: 0 12px 12px; border-radius: 0 0 10px 10px; transition: background .12s, outline-color .12s; }
+.board-column__tasks--drop-target { background: rgba(84, 174, 255, .08); outline: 2px dashed #54aeff; outline-offset: -4px; }
 .task-drop-zone { height: 8px; border-radius: 4px; transition: background .12s; }
 .task-drop-zone:hover { background: #54aeff; }
 .task-drop-zone--last { height: 12px; }
