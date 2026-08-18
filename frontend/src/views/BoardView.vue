@@ -409,10 +409,10 @@ function clearDrag() {
 .board-page { min-height: calc(100vh - 190px); background: #fff; }
 .board-state { padding: 40px; }
 .board-scroll { min-height: calc(100vh - 190px); overflow-x: auto; padding: 24px 28px 36px; }
-.board-columns { display: flex; align-items: flex-start; min-width: max-content; }
-.column-drop-zone { position: relative; width: 12px; min-height: 620px; border-radius: 6px; transition: background .15s; }
+.board-columns { display: flex; align-items: stretch; min-width: max-content; }
+.column-drop-zone { position: relative; width: 12px; min-height: 0; align-self: stretch; border-radius: 6px; transition: background .15s; }
 .column-drop-zone:hover { background: #ddf4ff; }
-.column-drop-zone--active::after { position: absolute; top: 8px; bottom: 8px; left: 50%; width: 2px; border-radius: 999px; background: #7dd3fc; content: ''; transform: translateX(-50%); }
+.column-drop-zone--active::after { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; border-radius: 999px; background: #7dd3fc; content: ''; transform: translateX(-50%); }
 .board-column { width: 344px; min-height: calc(100vh - 250px); display: flex; flex-direction: column; border: 1px solid #d0d7de; border-radius: 10px; background: #f6f8fa; }
 .board-column--drag-source { border-color: #7dd3fc; box-shadow: 0 0 0 1px #7dd3fc; }
 .board-column__header { min-height: 62px; padding: 14px 12px 12px 16px; display: flex; align-items: center; gap: 9px; }
@@ -436,7 +436,7 @@ function clearDrag() {
 .board-card__description { display: -webkit-box; overflow: hidden; color: #57606a; line-height: 1.45; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .add-item-button { width: 100%; min-height: 40px; border: 0; border-radius: 7px; background: transparent; color: #57606a; cursor: pointer; text-align: left; font-size: 15px; }
 .add-item-button:hover { background: #eaeef2; color: #1f2328; }
-.new-column-button { width: 164px; min-height: 46px; padding: 0 16px; border: 1px solid #d0d7de; border-radius: 8px; background: #f6f8fa; color: #1f2328; cursor: pointer; font-weight: 600; text-align: left; }
+.new-column-button { width: 164px; min-height: 46px; align-self: flex-start; padding: 0 16px; border: 1px solid #d0d7de; border-radius: 8px; background: #f6f8fa; color: #1f2328; cursor: pointer; font-weight: 600; text-align: left; }
 .new-column-button:hover { background: #eaeef2; }
 @media (prefers-reduced-motion: reduce) { .column-drop-zone, .task-drop-zone { transition: none; } }
 </style>
