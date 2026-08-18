@@ -47,7 +47,7 @@ Redis 연결 실패로 세션을 확인하거나 만들 수 없는 경우에는 
 ### Task
 
 - Task의 Project 소유권을 통해 권한을 판정한다.
-- 조회·수정·삭제·이동은 현재 User 소유 Project 안에서만 가능하다.
+- 조회·제목/설명 수정·날짜 수정·삭제·이동은 현재 User 소유 Project 안에서만 가능하다.
 - Task를 다른 User 또는 다른 Project로 이동할 수 없다.
 
 ## 행위별 권한표
@@ -62,6 +62,7 @@ Redis 연결 실패로 세션을 확인하거나 만들 수 없는 경우에는 
 | 일반 Task 생성 | 예 | Project와 Column 모두 내 소유이며 서로 일치 | `404` 또는 `400` |
 | AI Task 생성 | 예 | Project 소유자 | 타인 자원 `404` |
 | Task 조회·수정·삭제 | 예 | Project 소유자 | 타인 자원 `404` |
+| Task 시작일·종료일 변경 | 예 | Project 소유자 | 타인 자원 `404` |
 | Task 이동 | 예 | Task와 대상 Column이 같은 내 Project | `400`/`404` |
 
 ## CSRF와 CORS

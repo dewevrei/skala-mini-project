@@ -20,7 +20,7 @@
 
 ### 작업
 
-- `frontend/`: Vue 3 + Vite + SFC + Composition API + Pinia + Vue Router + Axios
+- `frontend/`: Vue 3 + Vite + SFC + Composition API + Pinia + Vue Router + Axios + Element Plus
 - `backend/`: Java 25 + Spring Boot 4.1.0 + Spring Security 7 + Data JPA + Maven
 - Spring AI 2.0.x BOM과 Google GenAI starter
 - Spring Session Data Redis와 Redis Open Source 8.8 세션 저장소
@@ -44,7 +44,7 @@ User, Project, BoardColumn, Task 엔티티를 ERD와 동일하게 구현한다.
 
 - 자동 증가 BIGINT ID
 - 유일키, 외래키, cascade, priority check 반영
-- `sortOrder`와 timestamp 매핑
+- nullable `startDate`, `endDate`, `sortOrder`와 timestamp 매핑
 - Project/Column/Task 소유권 조회용 repository query
 - 사용자가 Workbench에서 DDL 적용 후 Backend 시작 검증
 
@@ -113,8 +113,9 @@ Google 로그인으로 User를 생성·갱신하고 세션 기반 API 보안을 
 
 ### 작업
 
-- 선택 Column 맨 아래 일반 Task 생성; priority 1
+- 선택 Column 맨 아래 일반 Task 생성; priority 1, startDate/endDate null
 - Task title/description 수정, priority 읽기 전용
+- Task 날짜 전용 API로 startDate/endDate 지정·해제; 날짜 선후관계 제한 없음
 - Task 완전 삭제
 - Board 드래그: `targetColumnId`, `beforeTaskId`
 - Items 상태 변경: 대상 Column 맨 아래
@@ -124,7 +125,8 @@ Google 로그인으로 User를 생성·갱신하고 세션 기반 API 보안을 
 
 ### 서비스 단위 테스트
 
-- 일반 Task 입력과 priority
+- 일반 Task 입력과 priority, 생성 날짜 null
+- 날짜 지정·해제와 endDate가 startDate보다 앞선 값 허용
 - 동일 열 재정렬, 열 간 이동, 맨 아래 이동
 - 다른 Project 이동 거부
 - Items/Board 순서 일치
@@ -147,6 +149,7 @@ Gemini 구조화 출력으로 평면 Task 목록을 만들고 확정된 실패 �
 - 백엔드 description 접두부 조합
 - 고정 description 구분자 ` - `
 - 응답 순서대로 첫 Column 맨 아래 batch 저장
+- AI·fallback Task startDate/endDate null
 - 호출·검증 실패 fallback
 - DB batch 저장 실패 rollback·500, fallback 금지
 
@@ -170,6 +173,7 @@ Gemini 구조화 출력으로 평면 Task 목록을 만들고 확정된 실패 �
 - 공통 `ApiResponse` 성공·오류 처리
 - 닉네임 변경 화면
 - Project 생성·수정·삭제 경고 모달
+- Element Plus 공통 컴포넌트와 GitHub Projects 유사 정보 구조·시각 밀도 적용
 - Task 등록 Cancel은 확인창 없이 입력을 폐기하고 시작한 Board/Items로 복귀
 - 탭 활성화 시 최신 Project 재조회
 - 최소 1280px 최신 Chrome 데스크톱 UI와 기본 포커스·label·색 대비
@@ -192,13 +196,14 @@ Gemini 구조화 출력으로 평면 Task 목록을 만들고 확정된 실패 �
 - 각 그룹 `Add item` → 해당 Column 일반 등록
 - title 검색, 빈 그룹 유지
 - Status 선택 → 대상 Column 맨 아래
+- startDate/endDate 열에서 날짜를 직접 지정하거나 비우기
 - Task 수정·삭제 모달
 - 별도 AI Generate 진입 및 요청 중 버튼 비활성화
 
 ### 검증
 
 - `npm run build`
-- 생성·검색·상태 이동·삭제 수동 확인
+- 생성·검색·상태 이동·날짜 지정·날짜 해제·역순 날짜·삭제 수동 확인
 
 ## Phase 8 — Board View
 
@@ -255,10 +260,10 @@ frontend: npm run build
 | 인증·사용자 | REQ-FUNC-001~006, 039 | REQ-NFN-005~009, 014, 020, 023~025 |
 | Project | REQ-FUNC-007~011 | REQ-NFN-008, 010, 012, 014 |
 | BoardColumn | REQ-FUNC-012~016 | REQ-NFN-010~012, 020 |
-| 일반 Task | REQ-FUNC-017~019, 034~035 | REQ-NFN-008, 010~012, 014 |
+| 일반 Task | REQ-FUNC-017~019, 034~035, 041 | REQ-NFN-008, 010~012, 014 |
 | AI Task | REQ-FUNC-020~027 | REQ-NFN-009~014, 018, 021~022, 028 |
-| Items/Board | REQ-FUNC-028~033, 037 | REQ-NFN-011~012, 019~020 |
-| 공통 UI/API | REQ-FUNC-036, 038, 040 | REQ-NFN-001~002, 006~007, 014~016, 026~027 |
+| Items/Board | REQ-FUNC-028~033, 037, 041 | REQ-NFN-011~012, 019~020 |
+| 공통 UI/API | REQ-FUNC-036, 038, 040 | REQ-NFN-001~002, 006~007, 014~016, 026~027, 029 |
 | 수동 DB·검증 | 전체 데이터 계약 | REQ-NFN-003~004, 016~018 |
 
 ## 공유 파일 충돌 방지

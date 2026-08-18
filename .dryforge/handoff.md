@@ -34,7 +34,7 @@ Greenfield 분리형 웹 애플리케이션이다. 실행자는 먼저 고정 �
 ## 절대 조건
 
 - 구현 전에 `.dryforge/spec.md`를 읽는다. `docs/`는 목적별 상세 확인과 추적에 사용하되 명세에 없는 새 동작을 만들지 않는다.
-- 계층 Task, 협업, 일정 기능을 추가하지 않는다.
+- 계층 Task, 협업, 캘린더·자동 일정 기능을 추가하지 않는다. Task의 nullable 시작일·종료일은 구현 범위다.
 - 현재 첫 Column만 AI 생성 대상이며 일반 생성에는 항상 명시적 Column 문맥이 필요하다.
 - Column name은 Project 안에서 대소문자를 무시하고 유일하다.
 - AI 실패 fallback과 AI DB 실패 rollback을 혼동하지 않는다.
@@ -51,7 +51,7 @@ Greenfield 분리형 웹 애플리케이션이다. 실행자는 먼저 고정 �
 
 ## 문서에 포착되지 않은 의도
 
-- UI는 제공된 GitHub Projects 참고 이미지의 구조감을 참고하되, 이미지에 보이는 담당자·날짜·Estimate·저장소 등 미요청 기능과 모바일 전용 UI를 따라 만들지 않는다.
+- UI는 Element Plus를 사용해 제공된 GitHub Projects 참고 이미지의 구조감과 시각적 밀도를 따른다. 참고 이미지의 담당자·Estimate·저장소 등 미요청 기능과 모바일 전용 UI는 만들지 않되, 확정된 시작일·종료일은 Items에 제공한다.
 - 단순 MVP를 우선하므로 실시간 동기화와 서버 멱등성을 넣지 않는다.
 - priority는 정보이자 AI 판단 결과지만 자동 정렬 기준은 아니다.
 
@@ -69,8 +69,8 @@ User가 Project를 소유하고, Project가 순서 있는 BoardColumn을, BoardC
 
 ### 3. 기술 결정
 
-Vue 3/Vite Frontend와 Java 25/Spring Boot 4.1 Backend를 REST로 분리한다. Spring Security Google OAuth, Spring Session Data Redis, Redis Open Source 8.8, CSRF와 사용자별 소유권 검사를 적용한다. 세션은 24시간 미사용 만료, 쿠키는 7일이며 Redis 장애는 503으로 처리한다. MySQL 8.0.46 DDL은 사용자가 Workbench로 적용하고 JPA가 validate한다. Spring AI 2.0.x ChatClient와 Gemini Developer API를 사용하며 호출 설정은 timeout 30초, temperature 0.2, topP 0.9, 최대 8,192 tokens다. 동시 수정은 마지막 저장 우선이며 다른 탭은 활성화 시 재조회한다. Backend 서비스 단위 테스트와 Frontend production build가 필수다.
+Vue 3/Vite/Element Plus Frontend와 Java 25/Spring Boot 4.1 Backend를 REST로 분리한다. Spring Security Google OAuth, Spring Session Data Redis, Redis Open Source 8.8, CSRF와 사용자별 소유권 검사를 적용한다. 세션은 24시간 미사용 만료, 쿠키는 7일이며 Redis 장애는 503으로 처리한다. MySQL 8.0.46 DDL은 사용자가 Workbench로 적용하고 JPA가 validate한다. Spring AI 2.0.x ChatClient와 Gemini Developer API를 사용하며 호출 설정은 timeout 30초, temperature 0.2, topP 0.9, 최대 8,192 tokens다. 동시 수정은 마지막 저장 우선이며 다른 탭은 활성화 시 재조회한다. Backend 서비스 단위 테스트와 Frontend production build가 필수다.
 
 ### 4. 향후 범위
 
-운영 배포, HTTPS, 백업, 관측, 성능 SLA, 모바일·태블릿 UI, Chrome 외 브라우저 검증, 접근성 인증, 실시간 동기화, 서버 멱등성, 협업, 계층 Task, 일정·마감·캘린더, 첨부·담당자·카테고리·로드맵, 회원 탈퇴는 이번 구현 범위가 아니다. 향후 추가할 때 현재 User 소유권과 Project/Column/Task 불변 규칙을 의식적으로 재설계해야 한다.
+운영 배포, HTTPS, 백업, 관측, 성능 SLA, 모바일·태블릿 UI, Chrome 외 브라우저 검증, 접근성 인증, 실시간 동기화, 서버 멱등성, 협업, 계층 Task, 예상 소요 시간·캘린더·자동 일정, 첨부·담당자·카테고리·로드맵, 회원 탈퇴는 이번 구현 범위가 아니다. 향후 추가할 때 현재 User 소유권과 Project/Column/Task 불변 규칙을 의식적으로 재설계해야 한다.

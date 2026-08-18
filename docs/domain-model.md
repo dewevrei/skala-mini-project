@@ -113,6 +113,8 @@
 - `column`: 현재 상태 BoardColumn
 - `title`: 필수 제목
 - `description`: 선택 설명. AI Task는 생성 시 원본 제목 접두부를 포함한다.
+- `startDate`: 선택 시작일. 날짜만 저장하며 `null`일 수 있다.
+- `endDate`: 선택 종료일. 날짜만 저장하며 `null`일 수 있다.
 - `priority`: `1~5` 정수, `1`이 가장 높음
 - `sortOrder`: 소속 열 안 카드 순서
 - `createdAt`, `updatedAt`
@@ -124,6 +126,7 @@
 - BoardColumn 문맥이 있는 Board `+` 또는 Items `Add item`에서만 생성한다.
 - 선택한 BoardColumn 맨 아래에 추가한다.
 - `title`은 필수, `description`은 선택, `priority`는 항상 `1`이다.
+- `startDate`, `endDate`는 모두 `null`로 생성한다.
 
 #### AI Task
 
@@ -132,10 +135,13 @@
 - Gemini가 반환한 각 항목을 독립 Task로 저장한다.
 - 모든 결과를 현재 첫 번째 BoardColumn 맨 아래에 응답 순서대로 추가한다.
 - 저장 `description`은 정확히 `원본 title + " - " + AI description`이다.
+- AI 결과와 fallback Task 모두 `startDate`, `endDate`를 `null`로 생성한다.
 
 ### 생명주기
 
 - 제목과 설명은 수정 가능하다.
+- Items에서 시작일과 종료일을 각각 지정하거나 다시 비울 수 있다.
+- 시작일과 종료일의 선후관계는 제한하지 않으며 종료일이 시작일보다 앞서도 허용한다.
 - 우선순위는 생성 이후 수정 불가다.
 - 보드 드래그로 같은 열 안 순서를 바꾸거나 다른 열의 특정 위치로 이동할 수 있다.
 - Items의 상태 선택으로 이동하면 대상 열 맨 아래로 간다.
@@ -180,6 +186,7 @@
 8. 열 삭제는 그 열의 Task를 함께 완전 삭제한다.
 9. 첫 번째 BoardColumn은 언제나 AI 등록 대상이다.
 10. 보드와 Items는 같은 `sortOrder`를 공유한다.
+11. Task의 `startDate`와 `endDate`는 서로 독립적으로 `null`일 수 있으며 두 날짜의 순서를 강제하지 않는다.
 
 ## 인증 세션 기술 모델
 

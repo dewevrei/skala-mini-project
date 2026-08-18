@@ -74,6 +74,8 @@ public record ApiResponse<T>(
     "columnId": 100,
     "title": "회원 닉네임 변경",
     "description": "회원 변경 기능 - 회원 닉네임 변경 작업",
+    "startDate": null,
+    "endDate": null,
     "priority": 2,
     "sortOrder": 1,
     "createdAt": "2026-08-18T16:00:00+09:00",
@@ -185,6 +187,8 @@ Project 목록은 `createdAt DESC, id DESC`의 최근 생성순으로 반환한�
           "columnId": 100,
           "title": "작업",
           "description": null,
+          "startDate": null,
+          "endDate": null,
           "priority": 1,
           "sortOrder": 1
         }
@@ -206,6 +210,7 @@ Project 목록은 `createdAt DESC, id DESC`의 최근 생성순으로 반환한�
 | POST | `/projects/{projectId}/tasks/ai-generate` | `GenerateAiTasksRequest` | `201 TASKS_CREATED` | AI Task 목록 또는 fallback Task 생성 |
 | GET | `/projects/{projectId}/tasks/{taskId}` | 없음 | `200 TASK_READ` | Task 상세 |
 | PATCH | `/projects/{projectId}/tasks/{taskId}` | `UpdateTaskRequest` | `200 TASK_UPDATED` | title·description 수정 |
+| PATCH | `/projects/{projectId}/tasks/{taskId}/dates` | `UpdateTaskDatesRequest` | `200 TASK_DATES_UPDATED` | Items에서 시작일·종료일 지정 또는 해제 |
 | DELETE | `/projects/{projectId}/tasks/{taskId}` | 없음 | `200 TASK_DELETED` | Task 완전 삭제 |
 | PATCH | `/projects/{projectId}/tasks/{taskId}/status` | `ChangeTaskStatusRequest` | `200 TASK_MOVED` | Items 상태 변경; 대상 열 맨 아래 |
 | PATCH | `/projects/{projectId}/tasks/{taskId}/position` | `MoveTaskRequest` | `200 TASK_MOVED` | Board 드래그 위치 저장 |
@@ -229,6 +234,12 @@ Project 목록은 `createdAt DESC, id DESC`의 최근 생성순으로 반환한�
   "description": "수정된 설명 또는 null"
 }
 
+// UpdateTaskDatesRequest
+{
+  "startDate": "2026-08-18",
+  "endDate": null
+}
+
 // ChangeTaskStatusRequest
 {
   "targetColumnId": 101
@@ -240,6 +251,13 @@ Project 목록은 `createdAt DESC, id DESC`의 최근 생성순으로 반환한�
   "beforeTaskId": 2005
 }
 ```
+
+`UpdateTaskDatesRequest` 규칙:
+
+- `startDate`, `endDate` 두 key를 모두 보내며 각 값은 ISO-8601 달력 날짜(`YYYY-MM-DD`) 또는 `null`이다.
+- 두 값은 서로 독립적으로 지정하거나 비울 수 있다.
+- 날짜 선후관계를 검사하지 않으므로 `endDate`가 `startDate`보다 앞서도 저장한다.
+- 일반·AI·fallback 생성 요청은 날짜를 받지 않으며 서버가 두 값을 모두 `null`로 설정한다.
 
 `MoveTaskRequest` 규칙:
 
@@ -262,6 +280,8 @@ AI 생성 응답은 성공·fallback 모두 같은 형태다. fallback 여부를
         "id": 1001,
         "title": "회원 닉네임 변경",
         "description": "회원 변경 기능 - 회원 닉네임 변경 작업",
+        "startDate": null,
+        "endDate": null,
         "priority": 2,
         "columnId": 100,
         "sortOrder": 3
@@ -321,7 +341,7 @@ Task 등록은 별도 route가 아니라 시작한 Board/Items 위의 공통 mod
 | Column 생성·수정 | `{column}` |
 | Column 순서 변경 | `{columns}` |
 | Board·Items | `{project, columnGroups:[{column,tasks}]}` |
-| Task 생성·상세·수정 | `{task}` |
+| Task 생성·상세·수정·날짜 변경 | `{task}` |
 | AI 생성·fallback | `{tasks}` |
 | Task 위치·상태 이동 | `{task, affectedColumnGroups:[{column,tasks}]}` |
 

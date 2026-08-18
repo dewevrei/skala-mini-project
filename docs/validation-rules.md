@@ -26,6 +26,8 @@
 | BoardColumn | name | 예 | 1~50 | Project 범위 대소문자 무시 유일 | `INVALID_COLUMN_NAME` / `DUPLICATE_COLUMN_NAME` |
 | Task | title | 예 | 1~200 | 일반·AI·fallback 모두 동일 | `INVALID_TASK_TITLE` |
 | Task | description(일반) | 아니오 | 0~5000 | plain text, null 허용 | `INVALID_TASK_DESCRIPTION` |
+| Task | startDate | 아니오 | ISO `YYYY-MM-DD` | 유효한 달력 날짜 또는 null; endDate와 독립 | `INVALID_TASK_DATE` |
+| Task | endDate | 아니오 | ISO `YYYY-MM-DD` | 유효한 달력 날짜 또는 null; startDate와 선후관계 검사 없음 | `INVALID_TASK_DATE` |
 | AI 입력 | description | 예 | 1~5000 | Gemini 문맥으로만 사용 | `INVALID_AI_DESCRIPTION` |
 | Task | priority | 예 | 1~5 | 일반/fallback=1; AI=모델 결과; 수정 API 입력 금지 | `INVALID_TASK_PRIORITY` |
 | Search | title | 아니오 | 0~200 | 빈 값은 전체 조회; 포함 검색 | `INVALID_SEARCH_QUERY` |
@@ -79,6 +81,7 @@
 - `title` 필수, `description` 선택이다.
 - 클라이언트가 priority를 보내더라도 무시하지 않고 `400 READ_ONLY_FIELD`로 거부한다.
 - 서버가 priority `1`과 해당 열의 다음 `sortOrder`를 설정한다.
+- 서버가 `startDate`, `endDate`를 모두 `null`로 설정하며 생성 요청에서 날짜 입력은 받지 않는다.
 
 ## AI Task 생성 규칙
 
@@ -102,6 +105,7 @@
 - 저장 description = `trim(originalTitle) + " - " + trim(aiDescription)`.
 - 최종 저장 description이 5,000자를 넘으면 응답 검증 실패로 취급한다. 따라서 AI description 허용 길이는 `5000 - trim(originalTitle) 길이 - 구분자 길이`로 동적으로 계산한다.
 - 응답 배열 순서를 유지해 첫 번째 열 맨 아래에 연속 `sortOrder`를 부여한다.
+- 정상 AI 결과와 fallback Task의 `startDate`, `endDate`는 모두 `null`이다.
 
 ### 실패 분기
 
@@ -116,7 +120,9 @@
 ## Task 수정·이동·삭제 규칙
 
 - 수정 API는 `title`, `description`만 허용한다.
-- `priority`, `projectId`, `columnId`, `sortOrder`, timestamp 수정 입력은 `400 READ_ONLY_FIELD`다.
+- 날짜 수정 전용 API는 `startDate`, `endDate` 두 key를 모두 받으며 각 값은 유효한 ISO 달력 날짜 또는 `null`이어야 한다.
+- 두 날짜는 서로 독립적이며 `endDate < startDate`도 거부하지 않는다.
+- 일반 수정 API에서 `priority`, `projectId`, `columnId`, `sortOrder`, `startDate`, `endDate`, timestamp 수정 입력은 `400 READ_ONLY_FIELD`다.
 - 상태 변경 대상 열은 같은 Project여야 하며 대상 열 맨 아래로 이동한다.
 - 보드 위치 이동의 `beforeTaskId`는 대상 열에 있어야 한다.
 - Task 삭제는 소유자만 가능하며 완전 삭제한다.

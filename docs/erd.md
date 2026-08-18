@@ -48,6 +48,8 @@ erDiagram
         BIGINT column_id FK
         VARCHAR title
         TEXT description
+        DATE start_date
+        DATE end_date
         TINYINT priority
         BIGINT sort_order
         DATETIME created_at
@@ -62,6 +64,7 @@ erDiagram
 - 이름 중복과 제목 검색은 `utf8mb4_0900_ai_ci` collation으로 대소문자를 구분하지 않는다.
 - `tasks(project_id, column_id)`가 동일한 `board_columns(project_id, id)`를 참조하도록 복합 외래키를 사용한다.
 - `sort_order`는 서비스가 트랜잭션 안에서 재정렬한다. 조회 시 ID를 보조 정렬키로 사용한다.
+- `start_date`, `end_date`는 각각 nullable `DATE`이며 두 값의 선후관계를 강제하는 CHECK 제약을 두지 않는다.
 - `ON DELETE CASCADE`는 사용자가 확인한 Project·BoardColumn 완전 삭제에만 사용한다.
 - 애플리케이션 설정은 `spring.jpa.hibernate.ddl-auto=validate`다.
 
@@ -130,6 +133,8 @@ CREATE TABLE tasks (
     column_id BIGINT NOT NULL,
     title VARCHAR(200) NOT NULL,
     description TEXT NULL,
+    start_date DATE NULL,
+    end_date DATE NULL,
     priority TINYINT UNSIGNED NOT NULL,
     sort_order BIGINT NOT NULL,
     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),

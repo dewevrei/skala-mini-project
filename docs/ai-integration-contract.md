@@ -96,6 +96,8 @@ AiTaskItem
 ```text
 stored.title       = trim(ai.title)
 stored.description = trim(original.title) + " - " + trim(ai.description)
+stored.startDate   = null
+stored.endDate     = null
 stored.priority    = ai.priority
 stored.column      = 현재 sortOrder가 첫 번째인 BoardColumn
 stored.sortOrder   = 대상 열의 마지막 순서 다음 값
@@ -106,6 +108,7 @@ stored.sortOrder   = 대상 열의 마지막 순서 다음 값
 - Gemini 반환 배열 순서대로 Task 순서를 부여한다.
 - AI 생성 성공 시 원본 title·description을 부모·별도 Task나 요청 이력으로 저장하지 않는다. fallback Task는 이 규칙의 명시적 예외다.
 - AI 출처 필드를 Task에 추가하지 않는다.
+- Gemini에 날짜 생성을 요청하지 않으며 정상 AI 결과의 시작일·종료일은 항상 `null`이다.
 
 ## 트랜잭션 계약
 
@@ -120,6 +123,7 @@ stored.sortOrder   = 대상 열의 마지막 순서 다음 값
 
 - `title=trim(originalTitle)`, `description=trim(originalDescription)`으로 일반 Task 하나를 만든다.
 - priority는 `1`이다.
+- 시작일과 종료일은 모두 `null`이다.
 - 요청 처리 시점의 첫 번째 BoardColumn 맨 아래에 저장한다.
 - 성공 API는 정상 AI 생성과 같은 `201 TASKS_CREATED` 형태를 사용한다.
 - Frontend에 AI 실패 여부를 알리는 field·code·message를 제공하지 않는다.
@@ -151,6 +155,8 @@ DB Task:
 {
   "title": "회원 닉네임 변경",
   "description": "회원 변경 기능 - 회원 닉네임 변경 작업",
+  "startDate": null,
+  "endDate": null,
   "priority": 2
 }
 ```
@@ -166,6 +172,7 @@ DB Task:
 실제 Gemini를 호출하지 않고 AI gateway를 테스트 대역으로 교체해 서비스 메서드를 검증한다.
 
 - 정상 다중 결과 저장과 순서
+- 정상·fallback 생성 시 시작일·종료일 null
 - 원본 title 접두부 조합
 - priority 범위
 - 최초 형식 실패 후 1회 재시도 성공

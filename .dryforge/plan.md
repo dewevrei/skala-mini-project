@@ -8,7 +8,7 @@ Greenfield 초기화는 실행자가 본 작업 전에 인라인으로 수행한
 
 목표: ERD와 ApiResponse 계약을 구현의 공통 기반으로 만든다.  
 작업 대상: Backend entity/repository, 공통 API 응답·예외 계층, MySQL·Redis 환경 설정; 사용자 외부 상태인 Workbench DDL.  
-행동 계약: 명세 물리 필드 표의 네 엔티티·타입·nullability·유일성·cascade를 동일하게 매핑하고 `ddl-auto=validate`만 사용한다. Column name은 Project 범위, Project name은 User 범위, nickname은 전역 범위에서 대소문자를 무시해 유일하다. 오류 응답은 네 필드 봉투와 의미 있는 HTTP status를 유지한다.  
+행동 계약: 명세 물리 필드 표의 네 엔티티·타입·nullability·유일성·cascade를 동일하게 매핑하고 `ddl-auto=validate`만 사용한다. Task의 startDate/endDate는 nullable DATE이며 선후관계 제약을 두지 않는다. Column name은 Project 범위, Project name은 User 범위, nickname은 전역 범위에서 대소문자를 무시해 유일하다. 오류 응답은 네 필드 봉투와 의미 있는 HTTP status를 유지한다.
 검증: entity/DDL 수동 대조, Backend compile, schema validation 성공.  
 주의: DDL 자동 실행·마이그레이션 코드를 추가하지 않는다.
 
@@ -31,29 +31,29 @@ Greenfield 초기화는 실행자가 본 작업 전에 인라인으로 수행한
 
 목표: 일반 Task와 Board/Items의 공통 정렬·검색 계약을 구현한다.  
 작업 대상: Backend task service/API/repository query, 서비스 테스트.  
-행동 계약: 명시 Column 맨 아래 priority 1 생성, 수정 가능 필드 제한, Board drag 위치, Items 상태 이동 맨 아래, 그룹 조회와 title 검색을 구현한다.  
-검증: 서비스 단위 테스트로 정렬·이동·검색·타 Project 거부·불변 priority를 확인한다.
+행동 계약: 명시 Column 맨 아래 priority 1·startDate null·endDate null 생성, 수정 가능 필드 제한, 날짜 전용 변경 API, Board drag 위치, Items 상태 이동 맨 아래, 그룹 조회와 title 검색을 구현한다. 날짜 두 값은 독립적으로 null 가능하고 endDate가 startDate보다 앞서도 저장한다.
+검증: 서비스 단위 테스트로 정렬·이동·검색·타 Project 거부·불변 priority·날짜 지정/해제와 역순 날짜 허용을 확인한다.
 
 ## T5 — AI Task 서비스
 
 목표: Gemini 구조화 출력과 두 종류 실패 분기를 구현한다.  
 작업 대상: Backend AI gateway/prompt/DTO/service, 서비스 테스트, 환경 설정.  
-행동 계약: `gemini-2.5-flash`, 호출당 timeout 30초, temperature 0.2, topP 0.9, 최대 출력 8,192 tokens, 안전 설정 미지정을 적용한다. exact `{tasks:[{title,description,priority}]}` schema(비어 있지 않음, 추가 속성 금지, 문자열 nonblank, priority 정수 1..5), 1회 검증 재시도, 고정 `원본 title + " - " + AI description` 조합, 첫 열 batch 저장, 호출/검증 fallback, DB rollback·500을 정확히 분리한다.  
+행동 계약: `gemini-2.5-flash`, 호출당 timeout 30초, temperature 0.2, topP 0.9, 최대 출력 8,192 tokens, 안전 설정 미지정을 적용한다. exact `{tasks:[{title,description,priority}]}` schema(비어 있지 않음, 추가 속성 금지, 문자열 nonblank, priority 정수 1..5), 1회 검증 재시도, 고정 `원본 title + " - " + AI description` 조합, startDate/endDate null, 첫 열 batch 저장, 호출/검증 fallback, DB rollback·500을 정확히 분리한다.
 검증: 테스트 대역으로 AI 계약의 모든 서비스 테스트를 통과시킨다.
 
 ## T6 — Frontend 공통 shell·Project 관리
 
 목표: 로그인 이후 Project 선택과 공통 API 흐름을 완성한다.  
 작업 대상: Vue Router, Pinia, Axios, login/profile/project views와 dialogs.  
-행동 계약: credentials/CSRF, 명세의 성공 `data` exact shape와 ApiResponse 처리, Project CRUD, 확정 Frontend route, 공통 Task 등록 modal/overlay와 Cancel 무경고 폐기·원래 화면 복귀의 기반, 경고 모달, 탭 focus 재조회를 구현한다. 최소 1280px 최신 Chrome 데스크톱과 기본 포커스·label·색 대비만 공식 범위로 둔다.  
+행동 계약: credentials/CSRF, 명세의 성공 `data` exact shape와 ApiResponse 처리, Project CRUD, 확정 Frontend route, 공통 Task 등록 modal/overlay와 Cancel 무경고 폐기·원래 화면 복귀의 기반, 경고 모달, 탭 focus 재조회를 구현한다. Element Plus를 기반으로 GitHub Projects와 유사한 정보 구조와 시각적 밀도를 제공하며 최소 1280px 최신 Chrome 데스크톱과 기본 포커스·label·색 대비만 공식 범위로 둔다.
 검증: `npm run build`와 수동 Project 흐름.
 
 ## T7 — Items View
 
 목표: Column 그룹 Items 화면과 생성·검색·상태 변경을 구현한다.  
 작업 대상: Items view/components/store 연결.  
-행동 계약: 열·카드 저장 순서, 빈 검색 그룹 유지, 각 그룹 Add item, title 검색, 상태 변경 대상 맨 아래, Task 수정/삭제, AI Generate 요청 중 비활성화를 구현한다. Items에서 연 공통 등록 modal의 일반 Create·AI Generate Cancel이 입력을 폐기하고 Items를 그대로 보여주는지 검증한다.  
-검증: Frontend build와 수동 Items 시나리오.
+행동 계약: 열·카드 저장 순서, 빈 검색 그룹 유지, 각 그룹 Add item, title 검색, 상태 변경 대상 맨 아래, Task 수정/삭제, startDate/endDate 직접 지정·해제, AI Generate 요청 중 비활성화를 구현한다. Items에서 연 공통 등록 modal의 일반 Create·AI Generate Cancel이 입력을 폐기하고 Items를 그대로 보여주는지 검증한다.
+검증: Frontend build와 날짜 지정·해제·역순 날짜를 포함한 수동 Items 시나리오.
 
 ## T8 — Board View
 

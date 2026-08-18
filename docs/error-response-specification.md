@@ -81,6 +81,7 @@
 |---:|---|---|
 | 400 | `INVALID_TASK_TITLE` | 작업 제목을 입력해 주세요. |
 | 400 | `INVALID_TASK_DESCRIPTION` | 작업 설명을 확인해 주세요. |
+| 400 | `INVALID_TASK_DATE` | 작업 날짜를 확인해 주세요. |
 | 400 | `INVALID_TASK_PRIORITY` | 작업 우선순위가 올바르지 않습니다. |
 | 400 | `INVALID_AI_DESCRIPTION` | AI 생성을 위한 설명을 입력해 주세요. |
 | 400 | `READ_ONLY_FIELD` | 변경할 수 없는 항목이 포함되어 있습니다. |
@@ -136,6 +137,7 @@ DB 유일키 충돌은 SQL 메시지를 노출하지 않고 문맥별 `409 DUPLI
 | 201 | `TASKS_CREATED` | 작업이 등록되었습니다. |
 | 200 | `TASK_READ` | 작업을 조회했습니다. |
 | 200 | `TASK_UPDATED` | 작업이 수정되었습니다. |
+| 200 | `TASK_DATES_UPDATED` | 작업 날짜가 변경되었습니다. |
 | 200 | `TASK_DELETED` | 작업이 삭제되었습니다. |
 | 200 | `TASK_MOVED` | 작업이 이동되었습니다. |
 

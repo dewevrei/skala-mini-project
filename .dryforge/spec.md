@@ -2,7 +2,7 @@
 
 ## 목표와 동기
 
-Google 사용자가 서로 완전히 격리된 개인 Project와 칸반보드를 사용하고, 직접 Task를 등록하거나 Gemini가 큰 할 일을 독립 실행 Task 목록으로 분해하도록 한다. MVP는 Task 분해와 칸반 관리에 집중하며 계층, 협업, 마감일, 자동 일정 편성을 만들지 않는다.
+Google 사용자가 서로 완전히 격리된 개인 Project와 칸반보드를 사용하고, 직접 Task를 등록하거나 Gemini가 큰 할 일을 독립 실행 Task 목록으로 분해하도록 한다. Task에는 선택적인 시작일과 종료일을 기록할 수 있다. MVP는 Task 분해와 칸반 관리에 집중하며 계층, 협업, 캘린더와 자동 일정 편성을 만들지 않는다.
 
 ## 권위 있는 상세 계약
 
@@ -51,6 +51,7 @@ Google 사용자가 서로 완전히 격리된 개인 Project와 칸반보드를
 - Board의 Column `+` 또는 Items의 Column 그룹 `Add item`에서만 등록한다.
 - 선택 Column 맨 아래에 생성한다.
 - title 필수, description 선택, priority는 항상 1이다.
+- 일반 생성 시 startDate와 endDate는 모두 null이다.
 - title/description은 수정 가능하고 priority는 수정 불가다.
 - 삭제는 확인 후 완전 삭제한다.
 - 등록 화면의 `Cancel`은 입력 변경 여부와 관계없이 확인창 없이 입력을 폐기하고 시작한 Board 또는 Items로 돌아간다.
@@ -65,6 +66,7 @@ Google 사용자가 서로 완전히 격리된 개인 Project와 칸반보드를
 - AI 생성 성공 시 원본 title/description을 부모 또는 별도 Task로 추가 저장하지 않는다. 호출·검증 실패 때는 아래 fallback 규칙에 따라 원본 기반 Task 한 건만 저장한다.
 - 백엔드는 각 저장 description을 정확히 `원본 title + " - " + AI description`으로 만든다.
 - 모든 AI Task는 응답 순서대로 현재 첫 번째 Column 맨 아래에 한 트랜잭션으로 저장한다.
+- AI Task와 fallback Task의 startDate와 endDate는 모두 null이다.
 - 최초 구조 검증 실패 시 한 번 재요청한다. 호출 실패 또는 최종 검증 실패는 원본으로 일반 Task 하나를 조용히 저장한다.
 - 유효 AI 결과의 DB 저장 실패는 전체 rollback 후 500이며 fallback하지 않는다.
 
@@ -76,6 +78,7 @@ Google 사용자가 서로 완전히 격리된 개인 Project와 칸반보드를
 - 드래그는 동일 열 순서 또는 열과 위치를 함께 변경한다.
 - Items는 BoardColumn 순서대로 그룹화하고 각 그룹은 Board 카드 순서를 따른다.
 - Items Status 선택 이동은 대상 Column 맨 아래다.
+- Items에서 각 Task의 startDate와 endDate를 직접 지정하거나 null로 비울 수 있다. 두 날짜는 서로 독립적이며 endDate가 startDate보다 앞서도 허용한다.
 - title 부분 검색만 제공하며 대소문자를 구분하지 않고 빈 검색어는 전체를 표시한다. 검색 중에도 빈 Column 그룹을 유지한다.
 - 현재 탭은 mutation 응답으로 즉시 갱신하고 다른 탭은 활성화될 때 재조회한다.
 - 동시 변경은 잠금·버전 충돌 없이 마지막 저장 결과를 사용한다.
@@ -88,6 +91,7 @@ Google 사용자가 서로 완전히 격리된 개인 Project와 칸반보드를
 - Project에는 항상 최소 한 Column이 있다.
 - Project name은 User 범위, Column name은 Project 범위, nickname은 전역 범위에서 대소문자를 무시하고 유일하다.
 - Task priority는 생성 후 불변이며 1~5다.
+- Task startDate와 endDate는 nullable DATE이며 두 값의 선후관계를 강제하지 않는다.
 - Project/Column/Task 삭제는 soft delete 없이 확정된 범위 전체를 삭제한다.
 - DDL은 사용자가 Workbench로 적용하고 JPA `ddl-auto=validate`로만 검사한다.
 
@@ -98,7 +102,7 @@ Google 사용자가 서로 완전히 격리된 개인 Project와 칸반보드를
 | User (`users`) | `id BIGINT PK AUTO_INCREMENT`; `google_id VARCHAR(255) NOT NULL UNIQUE`; `name VARCHAR(255) NOT NULL`; `email VARCHAR(320) NOT NULL UNIQUE`; `nickname VARCHAR(255) NOT NULL UNIQUE`; `created_at`, `updated_at DATETIME(6) NOT NULL` |
 | Project (`projects`) | `id BIGINT PK`; `user_id BIGINT NOT NULL FK`; `name VARCHAR(100) NOT NULL`; `description TEXT NULL`; timestamps; `UNIQUE(user_id,name)` |
 | BoardColumn (`board_columns`) | `id BIGINT PK`; `project_id BIGINT NOT NULL FK`; `name VARCHAR(50) NOT NULL`; `sort_order INT NOT NULL`; timestamps; `UNIQUE(project_id,name)` |
-| Task (`tasks`) | `id BIGINT PK`; `project_id BIGINT NOT NULL`; `column_id BIGINT NOT NULL`; `title VARCHAR(200) NOT NULL`; `description TEXT NULL`; `priority TINYINT NOT NULL CHECK 1..5`; `sort_order BIGINT NOT NULL`; timestamps |
+| Task (`tasks`) | `id BIGINT PK`; `project_id BIGINT NOT NULL`; `column_id BIGINT NOT NULL`; `title VARCHAR(200) NOT NULL`; `description TEXT NULL`; `start_date DATE NULL`; `end_date DATE NULL`; `priority TINYINT NOT NULL CHECK 1..5`; `sort_order BIGINT NOT NULL`; timestamps |
 
 Task의 `(project_id,column_id)`는 동일 Project의 BoardColumn `(project_id,id)`를 참조한다. Project 삭제는 Column과 Task를, Column 삭제는 Task를 cascade한다. User 삭제 API는 없다. 문자열은 `utf8mb4`와 대소문자 무시 collation을 사용한다. 열 조회는 `sort_order,id`, 카드 조회는 `sort_order,id` 순이다.
 
@@ -155,10 +159,11 @@ OAuth callback에서 Redis 세션 저장이 실패하면 `/login?error=session-s
 | POST | `/api/v1/projects/{projectId}/columns/{columnId}/tasks` | `{title,description}`; priority 입력 금지 |
 | POST | `/api/v1/projects/{projectId}/tasks/ai-generate` | `{title,description}` 둘 다 필수 |
 | GET/PATCH/DELETE | `/api/v1/projects/{projectId}/tasks/{taskId}` | PATCH `{title,description}`만 허용 |
+| PATCH | `/api/v1/projects/{projectId}/tasks/{taskId}/dates` | `{startDate,endDate}` 두 key 필수; 각 값은 `YYYY-MM-DD` 또는 null; 날짜 선후관계 제한 없음 |
 | PATCH | `/api/v1/projects/{projectId}/tasks/{taskId}/status` | `{targetColumnId}`; 대상 열 맨 아래 |
 | PATCH | `/api/v1/projects/{projectId}/tasks/{taskId}/position` | `{targetColumnId,beforeTaskId}`; null이면 맨 아래, 값이면 그 Task 바로 앞 |
 
-Board/Items의 Task key는 `id,projectId,columnId,title,description,priority,sortOrder,createdAt,updatedAt`; Column key는 `id,projectId,name,sortOrder,taskCount`; Project key는 `id,name,description,createdAt,updatedAt`이다. Items 검색에서도 Column group을 유지한다.
+Board/Items의 Task key는 `id,projectId,columnId,title,description,startDate,endDate,priority,sortOrder,createdAt,updatedAt`; Column key는 `id,projectId,name,sortOrder,taskCount`; Project key는 `id,name,description,createdAt,updatedAt`이다. Items 검색에서도 Column group을 유지한다.
 
 ### 성공 응답 `data` exact shape
 
@@ -173,7 +178,7 @@ Board/Items의 Task key는 `id,projectId,columnId,title,description,priority,sor
 | Column 생성·수정 | `{column: Column}` |
 | Column 순서 변경 | `{columns: Column[]}` 전체 최신 순서 |
 | Board/Items 조회 | `{project: Project, columnGroups: ColumnGroup[]}` |
-| 일반 Task 생성·Task 상세·Task 수정 | `{task: Task}` |
+| 일반 Task 생성·Task 상세·Task 수정·날짜 변경 | `{task: Task}` |
 | AI 생성 또는 fallback | `{tasks: Task[]}` |
 | Board 위치 이동·Items 상태 이동 | `{task: Task, affectedColumnGroups: ColumnGroup[]}` |
 
@@ -181,7 +186,7 @@ Board/Items의 Task key는 `id,projectId,columnId,title,description,priority,sor
 User = {id,name,email,nickname,createdAt,updatedAt}
 Project = {id,name,description,createdAt,updatedAt}
 Column = {id,projectId,name,sortOrder,taskCount}
-Task = {id,projectId,columnId,title,description,priority,sortOrder,createdAt,updatedAt}
+Task = {id,projectId,columnId,title,description,startDate,endDate,priority,sortOrder,createdAt,updatedAt}
 ColumnGroup = {column:Column,tasks:Task[]}
 ```
 
@@ -210,6 +215,7 @@ ColumnGroup = {column:Column,tasks:Task[]}
 | 201 | `TASKS_CREATED` | 작업이 등록되었습니다. |
 | 200 | `TASK_READ` | 작업을 조회했습니다. |
 | 200 | `TASK_UPDATED` | 작업이 수정되었습니다. |
+| 200 | `TASK_DATES_UPDATED` | 작업 날짜가 변경되었습니다. |
 | 200 | `TASK_DELETED` | 작업이 삭제되었습니다. |
 | 200 | `TASK_MOVED` | 작업이 이동되었습니다. |
 
@@ -245,6 +251,7 @@ AI success와 fallback은 모두 `TASKS_CREATED`를 사용하고 차이를 노�
 | 500 | `COLUMN_DELETE_FAILED` | 보드 열을 삭제하지 못했습니다. |
 | 400 | `INVALID_TASK_TITLE` | 작업 제목을 입력해 주세요. |
 | 400 | `INVALID_TASK_DESCRIPTION` | 작업 설명을 확인해 주세요. |
+| 400 | `INVALID_TASK_DATE` | 작업 날짜를 확인해 주세요. |
 | 400 | `INVALID_TASK_PRIORITY` | 작업 우선순위가 올바르지 않습니다. |
 | 400 | `INVALID_AI_DESCRIPTION` | AI 생성을 위한 설명을 입력해 주세요. |
 | 400 | `READ_ONLY_FIELD` | 변경할 수 없는 항목이 포함되어 있습니다. |
@@ -274,7 +281,8 @@ AI success와 fallback은 모두 `TASKS_CREATED`를 사용하고 차이를 노�
 - priority는 문자열·소수가 아닌 정수 1~5다.
 - 하나라도 실패하면 전체 응답이 실패다.
 - 구조 실패는 동일 입력으로 한 번 재요청하고 재실패 시 fallback한다. 연결·timeout·안전 차단처럼 결과가 없는 실패는 즉시 fallback한다.
-- fallback Task는 `title=trim(originalTitle)`, `description=trim(originalDescription)`, `priority=1`, `column=요청 처리 시점의 첫 Column`, `sortOrder=해당 열의 다음 순서`다.
+- fallback Task는 `title=trim(originalTitle)`, `description=trim(originalDescription)`, `startDate=null`, `endDate=null`, `priority=1`, `column=요청 처리 시점의 첫 Column`, `sortOrder=해당 열의 다음 순서`다.
+- AI 정상 결과도 `startDate=null`, `endDate=null`로 저장하며 모델 출력 schema에는 날짜를 포함하지 않는다.
 - 저장 description은 정확히 `trim(originalTitle) + " - " + trim(aiDescription)`이다. 구분자 ` - `는 고정이며 최종 5,000자 이하여야 한다. 길이 초과는 해당 AI batch 전체의 구조·값 검증 실패로 처리한다.
 - 유효 batch 저장은 전부 성공/rollback이다. DB 저장 오류는 `500 TASK_BATCH_SAVE_FAILED`이며 fallback하지 않는다.
 
@@ -305,7 +313,7 @@ AI success와 fallback은 모두 `TASKS_CREATED`를 사용하고 차이를 노�
 
 ## 기술 결정
 
-- Frontend: Vue.js 3, SFC, Vite, Composition API, Pinia, Vue Router, Axios
+- Frontend: Vue.js 3, SFC, Vite, Composition API, Pinia, Vue Router, Axios, Element Plus
 - Backend: Java 25, Spring Boot 4.1.0, Spring Security 7, Spring Data JPA, Maven
 - AI: Spring AI 2.0.x, Google GenAI starter, Gemini Developer API API key
 - RDB: MySQL 8.0.46
@@ -319,7 +327,7 @@ AI success와 fallback은 모두 `TASKS_CREATED`를 사용하고 차이를 노�
 
 - Project 공유·협업·초대·관리자 역할
 - Task 계층, 담당자, 첨부, 카테고리, 저장소, 로드맵
-- 날짜·마감·소요 시간·캘린더·자동 일정
+- 예상 소요 시간·캘린더·자동 일정
 - Markdown/Rich text
 - 회원 탈퇴
 - 운영 배포·HTTPS·백업·모니터링
@@ -338,6 +346,7 @@ AI success와 fallback은 모두 `TASKS_CREATED`를 사용하고 차이를 노�
 - 타 User 자원 ID → 404.
 - Redis 장애 → 메모리 fallback 없이 503.
 - Task 등록 Cancel → 확인창 없이 입력 폐기 후 시작 화면 복귀.
+- Task 날짜 변경 → 두 값 모두 null 가능, 유효한 달력 날짜만 허용, endDate가 startDate보다 앞서도 허용.
 
 ## 필수 검증
 

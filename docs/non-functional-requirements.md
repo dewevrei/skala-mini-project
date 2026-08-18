@@ -7,7 +7,7 @@
 
 | 요구사항 ID | 요구사항명 | 상세 요구사항 내용 | 중요도 | 난이도 | 비고/제약사항 |
 |---|---|---|---|---|---|
-| REQ-NFN-001 | 기술 스택 준수 | Frontend는 Vue.js 3, SFC, Vite, Composition API, Pinia, Vue Router, Axios를 사용하고 Backend는 Java 25, Spring Boot 4.1.0, Spring Security 7, Spring Data JPA, Spring Session Data Redis, Maven을 사용한다. | 필수 | 중간 | 대체 스택 사용 금지 |
+| REQ-NFN-001 | 기술 스택 준수 | Frontend는 Vue.js 3, SFC, Vite, Composition API, Pinia, Vue Router, Axios, Element Plus를 사용하고 Backend는 Java 25, Spring Boot 4.1.0, Spring Security 7, Spring Data JPA, Spring Session Data Redis, Maven을 사용한다. | 필수 | 중간 | 대체 스택 사용 금지 |
 | REQ-NFN-002 | 분리형 구조 | 프런트엔드와 백엔드는 분리된 애플리케이션으로 구성하고 REST API로 통신한다. | 필수 | 중간 | 로컬 개발 포트 분리 |
 | REQ-NFN-003 | 데이터베이스 고정 | MySQL 8.0.46을 사용한다. 스키마 DDL은 사용자가 MySQL Workbench로 직접 적용한다. | 필수 | 중간 | 자동 마이그레이션 도구 사용 안 함 |
 | REQ-NFN-004 | 스키마 검증 | JPA `ddl-auto=validate`를 사용해 시작 시 엔티티와 실제 스키마 불일치를 탐지하고 불일치 시 실행을 중단한다. | 필수 | 낮음 | 자동 생성·수정 금지 |
@@ -35,6 +35,7 @@
 | REQ-NFN-026 | 데스크톱 화면 지원 | 최소 너비 1280px의 최신 Chrome 정식 데스크톱 버전을 공식 지원한다. 모바일·태블릿과 다른 브라우저의 공식 검증은 하지 않는다. | 높음 | 낮음 | 반응형 모바일 UI는 MVP 범위 밖 |
 | REQ-NFN-027 | 기본 접근성 | 키보드 포커스 표시, 입력 항목의 이름 연결, 기본 색상 대비를 적용한다. | 높음 | 낮음 | 특정 접근성 인증 등급 준수는 범위 밖 |
 | REQ-NFN-028 | AI 호출 설정 | Gemini 호출당 timeout 30초, temperature 0.2, topP 0.9, 최대 출력 8,192 tokens를 사용하며 안전 설정은 별도로 덮어쓰지 않는다. | 필수 | 중간 | topK 등 미지정 항목은 모델 기본값 |
+| REQ-NFN-029 | UI 구성 기준 | Element Plus 컴포넌트를 기반으로 GitHub Projects와 유사한 정보 구조와 시각적 밀도를 제공한다. | 높음 | 중간 | GitHub 화면의 미요청 기능을 복제하지 않으며 공식 지원 범위는 데스크톱 |
 
 ## 품질 목표의 경계
 
