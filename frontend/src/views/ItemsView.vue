@@ -417,7 +417,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 }
 
 .items-group__header {
-  min-height: 54px;
+  min-height: 50px;
   padding: 0 28px 0 24px;
   display: flex;
   align-items: center;
@@ -464,7 +464,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 }
 
 .items-row {
-  min-height: 44px;
+  min-height: 40px;
   border-bottom: 1px solid #d8dee4;
   background: #fff;
 }
