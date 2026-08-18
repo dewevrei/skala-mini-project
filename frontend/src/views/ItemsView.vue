@@ -53,11 +53,6 @@ function toggleColumn(columnId) {
   collapsedColumnIds.value = next
 }
 
-function statusTone(columnId) {
-  const index = statusOptions.value.findIndex((column) => String(column.id) === String(columnId))
-  return `status-cell--${index >= 0 ? index % 6 : 5}`
-}
-
 async function refreshItems({ quiet = false } = {}) {
   const sequence = ++requestSequence
   if (!quiet) loading.value = true
@@ -257,7 +252,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
                   {{ task.title }}
                 </button>
               </div>
-              <div class="status-cell" :class="statusTone(task.columnId)" role="cell">
+              <div class="status-cell" role="cell">
                 <el-select
                   :model-value="task.columnId"
                   :disabled="isTaskPending(task.id)"
@@ -511,21 +506,9 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 }
 
 .status-cell :deep(.el-select__selected-item) {
-  width: fit-content;
-  padding: 2px 9px;
-  border: 1px solid #b7dfba;
-  border-radius: 999px;
-  background: #dafbe1;
-  color: #2f7d32;
+  color: #57606a;
   font-size: 14px;
-  line-height: 20px;
 }
-
-.status-cell--1 :deep(.el-select__selected-item) { border-color: #e7c95f; background: #fff8c5; color: #9a6700; }
-.status-cell--2 :deep(.el-select__selected-item) { border-color: #f0b78d; background: #fff1e5; color: #bc4c00; }
-.status-cell--3 :deep(.el-select__selected-item) { border-color: #a9d6ff; background: #ddf4ff; color: #0969da; }
-.status-cell--4 :deep(.el-select__selected-item) { border-color: #d8b4fe; background: #fbefff; color: #8250df; }
-.status-cell--5 :deep(.el-select__selected-item) { border-color: #d0d7de; background: #f6f8fa; color: #57606a; }
 
 .date-cell :deep(.el-input__inner) {
   cursor: pointer;
