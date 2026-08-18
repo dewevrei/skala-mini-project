@@ -390,7 +390,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 }
 
 .items-table-header {
-  min-height: 54px;
+  min-height: 46px;
   align-items: center;
   border-bottom: 1px solid #8c959f;
   background: #fff;
@@ -401,7 +401,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 .items-table-header > div,
 .items-row > div {
   height: 100%;
-  padding: 13px 24px;
+  padding: 8px 20px;
   display: flex;
   align-items: center;
   border-right: 1px solid #d8dee4;
@@ -417,8 +417,8 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 }
 
 .items-group__header {
-  min-height: 70px;
-  padding: 0 38px 0 32px;
+  min-height: 54px;
+  padding: 0 28px 0 24px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -449,13 +449,13 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 .items-group__header h3 {
   margin: 0;
   color: #24292f;
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 500;
 }
 
 .task-count {
   min-width: 28px;
-  padding: 3px 9px;
+  padding: 2px 8px;
   border-radius: 999px;
   background: #eff2f5;
   color: #57606a;
@@ -464,12 +464,12 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 }
 
 .items-row {
-  min-height: 56px;
+  min-height: 44px;
   border-bottom: 1px solid #d8dee4;
   background: #fff;
 }
 
-.items-row > div { padding: 8px 20px; }
+.items-row > div { padding: 4px 16px; }
 
 .items-row:hover {
   background: #f6f8fa;
@@ -482,7 +482,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 
 .task-title-button {
   max-width: 100%;
-  padding: 5px 3px;
+  padding: 3px;
   overflow: hidden;
   border: 0;
   background: transparent;
@@ -505,8 +505,8 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 
 .add-item-button {
   width: 100%;
-  min-height: 58px;
-  padding: 0 38px;
+  min-height: 46px;
+  padding: 0 28px;
   border: 0;
   border-bottom: 1px solid #d0d7de;
   background: #fff;
