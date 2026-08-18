@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dewevrei.aikanban.auth.AuthenticatedUser;
+import com.dewevrei.aikanban.aitask.AiGenerateRequest;
+import com.dewevrei.aikanban.aitask.AiTaskService;
 import com.dewevrei.aikanban.common.api.ApiCode;
 import com.dewevrei.aikanban.common.api.ApiResponse;
 
@@ -20,8 +22,21 @@ import com.dewevrei.aikanban.common.api.ApiResponse;
 @RequestMapping("/api/v1/projects/{projectId}")
 public class TaskController {
     private final TaskService service;
+    private final AiTaskService aiTaskService;
 
-    public TaskController(TaskService service) { this.service = service; }
+    public TaskController(TaskService service, AiTaskService aiTaskService) {
+        this.service = service;
+        this.aiTaskService = aiTaskService;
+    }
+
+    @PostMapping("/tasks/ai-generate")
+    public ResponseEntity<ApiResponse<TasksData>> generate(
+            @AuthenticationPrincipal AuthenticatedUser user, @PathVariable long projectId,
+            @RequestBody AiGenerateRequest request) {
+        return ResponseEntity.status(ApiCode.TASKS_CREATED.status()).body(ApiResponse.success(
+                ApiCode.TASKS_CREATED,
+                new TasksData(aiTaskService.generate(user.userId(), projectId, request))));
+    }
 
     @PostMapping("/columns/{columnId}/tasks")
     public ResponseEntity<ApiResponse<TaskData>> create(@AuthenticationPrincipal AuthenticatedUser user,
@@ -95,4 +110,5 @@ public class TaskController {
     }
 
     public record TaskData(TaskResponse task) {}
+    public record TasksData(java.util.List<TaskResponse> tasks) {}
 }

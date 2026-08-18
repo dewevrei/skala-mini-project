@@ -33,9 +33,11 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET:local-placeholder}
             scope: openid,profile,email
   ai:
+    retry:
+      max-attempts: 1
     google:
       genai:
-        api-key: ${GEMINI_API_KEY:local-placeholder}
+        api-key: ${GEMINI_API_KEY}
         chat:
           model: gemini-2.5-flash
           temperature: 0.2
