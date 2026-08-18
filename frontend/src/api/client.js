@@ -26,6 +26,11 @@ export const apiClient = axios.create({
 
 let csrf = null
 let csrfRequest = null
+let authenticationFailureHandler = null
+
+export function onAuthenticationFailure(handler) {
+  authenticationFailureHandler = handler
+}
 
 export async function ensureCsrfToken() {
   if (csrf) return csrf
@@ -66,8 +71,10 @@ apiClient.interceptors.response.use(
     return envelope.data
   },
   (error) => {
-    if (error.response?.data?.code === 'CSRF_TOKEN_INVALID') clearCsrfToken()
-    return Promise.reject(new ApiError(error.response?.data, error.response?.status))
+    const apiError = new ApiError(error.response?.data, error.response?.status)
+    if (apiError.code === 'CSRF_TOKEN_INVALID') clearCsrfToken()
+    if (apiError.code === 'AUTHENTICATION_REQUIRED') authenticationFailureHandler?.(apiError)
+    return Promise.reject(apiError)
   },
 )
 

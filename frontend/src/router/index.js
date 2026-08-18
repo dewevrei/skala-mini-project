@@ -20,6 +20,14 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
   if (to.meta.public) {
+    try {
+      await auth.initialize(auth.authenticated)
+    } catch (error) {
+      if (error.code === 'SESSION_SERVICE_UNAVAILABLE' && to.query.error !== 'session-service-unavailable') {
+        return { name: 'login', query: { ...to.query, error: 'session-service-unavailable' } }
+      }
+      return true
+    }
     if (to.name === 'login' && auth.authenticated) return { name: 'projects' }
     return true
   }

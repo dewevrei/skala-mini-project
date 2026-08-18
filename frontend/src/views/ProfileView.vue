@@ -26,6 +26,8 @@ async function save() {
     ElMessage.error(error.message)
     if (error.code === 'SESSION_SERVICE_UNAVAILABLE') {
       await router.replace({ path: '/login', query: { error: 'session-service-unavailable' } })
+    } else if (error.code === 'AUTHENTICATION_REQUIRED' || !auth.authenticated) {
+      await router.replace('/login')
     }
   } finally {
     saving.value = false
@@ -39,6 +41,11 @@ async function logout() {
     await router.replace('/login')
   } catch (error) {
     ElMessage.error(error.message)
+    if (error.code === 'SESSION_SERVICE_UNAVAILABLE') {
+      await router.replace({ path: '/login', query: { error: 'session-service-unavailable' } })
+    } else if (!auth.authenticated) {
+      await router.replace('/login')
+    }
   } finally {
     loggingOut.value = false
   }
