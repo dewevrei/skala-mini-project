@@ -81,6 +81,7 @@ select {
   background: #fff;
   border-color: #43853d;
   color: #1f2328;
+  text-decoration: none;
 }
 
 .google-login:hover,
@@ -88,6 +89,7 @@ select {
   background: #dafbe1;
   border-color: #2f7d32;
   color: #1f2328;
+  text-decoration: none;
 }
 
 .profile-page {
