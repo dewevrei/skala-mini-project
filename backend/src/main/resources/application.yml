@@ -1,4 +1,8 @@
 spring:
+  # Load local development secrets from backend/.env when the app is started there.
+  # The file is ignored by Git; production should inject equivalent environment variables.
+  config:
+    import: optional:file:./.env[.properties]
   application:
     name: ai-kanban
   datasource:
