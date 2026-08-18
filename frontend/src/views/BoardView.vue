@@ -1,7 +1,8 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { VueDraggable } from 'vue-draggable-plus'
 import TaskCreateModal from '../components/TaskCreateModal.vue'
 import BoardTaskModal from '../components/BoardTaskModal.vue'
 import { projectApi } from '../api/projects'
@@ -23,8 +24,7 @@ const selectedColumn = ref(null)
 const columnName = ref('')
 const columnPending = ref(false)
 const movePending = ref(false)
-const dragging = reactive({ kind: '', id: null, columnId: null })
-const columnDropTargetId = ref(null)
+const columnOrderBefore = ref([])
 const projectId = computed(() => route.params.projectId)
 
 async function fetchBoard({ quiet = false } = {}) {
@@ -143,31 +143,15 @@ async function deleteColumn(group) {
   }
 }
 
-function startColumnDrag(event, columnId) {
-  dragging.kind = 'column'
-  dragging.id = columnId
-  dragging.columnId = null
-  columnDropTargetId.value = null
-  event.dataTransfer.effectAllowed = 'move'
-  event.dataTransfer.setData('application/x-ai-kanban-column', String(columnId))
-  const dragPreview = document.createElement('canvas')
-  dragPreview.width = 1
-  dragPreview.height = 1
-  event.dataTransfer.setDragImage(dragPreview, 0, 0)
+function rememberColumnOrder() {
+  columnOrderBefore.value = groups.value.map(({ column }) => String(column.id))
 }
 
-async function dropColumnBefore(targetColumnId) {
-  if (dragging.kind !== 'column' || String(dragging.id) === String(targetColumnId) || movePending.value) return
-  const previous = [...groups.value]
-  const moving = groups.value.find(({ column }) => String(column.id) === String(dragging.id))
-  const rest = groups.value.filter(({ column }) => String(column.id) !== String(dragging.id))
-  const targetIndex = rest.findIndex(({ column }) => String(column.id) === String(targetColumnId))
-  rest.splice(targetIndex, 0, moving)
-  if (rest.every((group, index) => String(group.column.id) === String(previous[index].column.id))) {
-    clearDrag()
-    return
-  }
-  groups.value = rest
+async function persistColumnOrder(event) {
+  if (movePending.value || event.oldIndex === event.newIndex) return
+  const currentOrder = groups.value.map(({ column }) => String(column.id))
+  if (currentOrder.every((id, index) => id === columnOrderBefore.value[index])) return
+
   movePending.value = true
   try {
     const response = await columnApi.reorder(projectId.value, groups.value.map(({ column }) => column.id))
@@ -175,56 +159,29 @@ async function dropColumnBefore(targetColumnId) {
     groups.value = response.data.columns.map(column => ({ column, tasks: tasksById.get(String(column.id)) ?? [] }))
     ElMessage.success(response.message)
   } catch (error) {
-    groups.value = previous
     ElMessage.error(error.message)
     await fetchBoard({ quiet: true })
   } finally {
     movePending.value = false
-    clearDrag()
   }
 }
 
-async function dropColumnAtEnd() {
-  if (dragging.kind !== 'column' || movePending.value) return
-  const last = groups.value.at(-1)?.column.id
-  if (String(last) === String(dragging.id)) return clearDrag()
-  const previous = [...groups.value]
-  const moving = groups.value.find(({ column }) => String(column.id) === String(dragging.id))
-  groups.value = groups.value.filter(({ column }) => String(column.id) !== String(dragging.id))
-  groups.value.push(moving)
-  movePending.value = true
-  try {
-    const response = await columnApi.reorder(projectId.value, groups.value.map(({ column }) => column.id))
-    const tasksById = new Map(groups.value.map(group => [String(group.column.id), group.tasks]))
-    groups.value = response.data.columns.map(column => ({ column, tasks: tasksById.get(String(column.id)) ?? [] }))
-    ElMessage.success(response.message)
-  } catch (error) {
-    groups.value = previous
-    ElMessage.error(error.message)
+async function persistTaskMove(event) {
+  if (movePending.value || event.from === event.to) return
+  await nextTick()
+  const taskId = event.item?.dataset.taskId
+  const targetColumnId = event.to?.dataset.columnId
+  if (!taskId || !targetColumnId) {
     await fetchBoard({ quiet: true })
-  } finally {
-    movePending.value = false
-    clearDrag()
-  }
-}
-
-function startTaskDrag(event, task) {
-  dragging.kind = 'task'
-  dragging.id = task.id
-  dragging.columnId = task.columnId
-  event.dataTransfer.effectAllowed = 'move'
-  event.dataTransfer.setData('application/x-ai-kanban-task', String(task.id))
-}
-
-async function dropTask(targetColumnId, beforeTaskId = null) {
-  if (dragging.kind !== 'task' || movePending.value || String(dragging.id) === String(beforeTaskId)) return
-  if (String(dragging.columnId) === String(targetColumnId)) {
-    clearDrag()
     return
   }
+  const targetGroup = groups.value.find(({ column }) => String(column.id) === String(targetColumnId))
+  const taskIndex = targetGroup?.tasks.findIndex(({ id }) => String(id) === String(taskId)) ?? -1
+  const beforeTaskId = taskIndex >= 0 ? targetGroup.tasks[taskIndex + 1]?.id ?? null : null
+
   movePending.value = true
   try {
-    const response = await taskApi.move(projectId.value, dragging.id, { targetColumnId, beforeTaskId })
+    const response = await taskApi.move(projectId.value, taskId, { targetColumnId, beforeTaskId })
     applyAffectedGroups(response.data.affectedColumnGroups)
     ElMessage.success(response.message)
   } catch (error) {
@@ -232,7 +189,6 @@ async function dropTask(targetColumnId, beforeTaskId = null) {
     await fetchBoard({ quiet: true })
   } finally {
     movePending.value = false
-    clearDrag()
   }
 }
 
@@ -241,81 +197,35 @@ function applyAffectedGroups(affected) {
   groups.value = groups.value.map(group => byId.get(String(group.column.id)) ?? group)
 }
 
-function allowDrop(event, kind) {
-  if (dragging.kind === kind && !movePending.value) {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'move'
-  }
-}
-
-function allowColumnContentsDrop(event, targetColumnId = null) {
-  if ((dragging.kind === 'task' || dragging.kind === 'column') && !movePending.value) {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'move'
-    if (dragging.kind === 'column' && targetColumnId !== null) {
-      columnDropTargetId.value = String(targetColumnId)
-    }
-  }
-}
-
-function allowBoardDrop(event) {
-  if ((dragging.kind === 'task' || dragging.kind === 'column') && !movePending.value) {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'move'
-  }
-}
-
-function dropOnColumn(targetColumnId) {
-  if (dragging.kind === 'task') return dropTask(targetColumnId, null)
-  if (dragging.kind === 'column') return dropColumnBefore(targetColumnId)
-}
-
-function dropAtBoardEnd() {
-  if (dragging.kind === 'task') {
-    const lastColumnId = groups.value.at(-1)?.column.id
-    if (lastColumnId !== undefined) return dropTask(lastColumnId, null)
-    return
-  }
-  if (dragging.kind === 'column') return dropColumnAtEnd()
-}
-
-function clearDrag() {
-  dragging.kind = ''
-  dragging.id = null
-  dragging.columnId = null
-  columnDropTargetId.value = null
-}
 </script>
 
 <template>
-  <section
-    class="board-page"
-    aria-label="프로젝트 Board"
-    @dragover="allowBoardDrop($event)"
-    @drop.prevent="clearDrag"
-  >
+  <section class="board-page" aria-label="프로젝트 Board">
     <div v-if="loading" class="board-state" aria-live="polite">
       <el-skeleton :rows="7" animated />
     </div>
     <el-result v-else-if="errorMessage" icon="error" title="Board를 불러오지 못했습니다" :sub-title="errorMessage">
       <template #extra><el-button type="primary" @click="fetchBoard()">다시 시도</el-button></template>
     </el-result>
-    <div v-else class="board-scroll" @drop.self="dropAtBoardEnd">
-      <div class="board-columns" @drop.self="dropAtBoardEnd">
-        <template v-for="group in groups" :key="group.column.id">
-          <div
-            class="column-drop-zone"
-            :class="{ 'column-drop-zone--active': dragging.kind === 'column' && columnDropTargetId === String(group.column.id) }"
-            aria-hidden="true"
-            @dragover="allowColumnContentsDrop($event, group.column.id)"
-            @drop="dropOnColumn(group.column.id)"
-          />
-          <article
-            class="board-column"
-            :class="{ 'board-column--drag-source': dragging.kind === 'task' && String(dragging.columnId) === String(group.column.id) }"
-            @dragover="allowColumnContentsDrop($event, group.column.id)"
-            @drop="dropOnColumn(group.column.id)"
-          >
+    <div v-else class="board-scroll">
+      <VueDraggable
+        v-model="groups"
+        class="board-columns"
+        draggable=".board-column"
+        handle=".column-menu-handle"
+        direction="horizontal"
+        :animation="150"
+        :force-fallback="true"
+        :fallback-on-body="true"
+        :fallback-tolerance="4"
+        fallback-class="column-drag-preview"
+        ghost-class="column-sort-ghost"
+        chosen-class="column-sort-chosen"
+        :disabled="movePending"
+        @start="rememberColumnOrder"
+        @end="persistColumnOrder"
+      >
+        <article v-for="group in groups" :key="group.column.id" class="board-column">
             <header class="board-column__header">
               <span class="board-column__marker" />
               <h2>{{ group.column.name }}</h2>
@@ -324,11 +234,8 @@ function clearDrag() {
                 <button
                   class="icon-button column-menu-handle"
                   type="button"
-                  :draggable="!movePending"
                   :aria-label="`${group.column.name} Column 메뉴 또는 순서 이동`"
                   title="클릭하여 메뉴 열기 · 드래그하여 Column 순서 이동"
-                  @dragstart="startColumnDrag($event, group.column.id)"
-                  @dragend="clearDrag"
                 >•••</button>
                 <template #dropdown>
                   <el-dropdown-menu>
@@ -339,49 +246,42 @@ function clearDrag() {
               </el-dropdown>
               <button class="icon-button" type="button" aria-label="Task 추가" @click="openTaskCreate(group.column.id)">＋</button>
             </header>
-            <div
+            <VueDraggable
+              v-model="group.tasks"
               class="board-column__tasks"
-              @dragover="allowDrop($event, 'task')"
-              @drop="dropTask(group.column.id, null)"
+              :data-column-id="group.column.id"
+              group="board-tasks"
+              draggable=".board-card"
+              :sort="false"
+              :animation="150"
+              :force-fallback="true"
+              :fallback-on-body="true"
+              :fallback-tolerance="4"
+              ghost-class="task-sort-ghost"
+              chosen-class="task-sort-chosen"
+              :disabled="movePending"
+              @end="persistTaskMove"
             >
-              <template v-for="task in group.tasks" :key="task.id">
-                <div class="task-drop-zone" @dragover="allowDrop($event, 'task')" @drop="dropTask(group.column.id, task.id)" />
-                <button
-                  type="button"
-                  class="board-card"
-                  draggable="true"
-                  :disabled="movePending"
-                  @dragstart="startTaskDrag($event, task)"
-                  @dragend="clearDrag"
-                  @click="openTaskEdit(task)"
-                >
-                  <span class="board-card__topline">
-                    <strong>{{ task.title }}</strong>
-                    <span class="priority-badge">P{{ task.priority }}</span>
-                  </span>
-                  <span v-if="task.description" class="board-card__description">{{ task.description }}</span>
-                </button>
-              </template>
-              <div class="task-drop-zone task-drop-zone--last" @dragover="allowDrop($event, 'task')" @drop="dropTask(group.column.id, null)" />
+              <button
+                v-for="task in group.tasks"
+                :key="task.id"
+                type="button"
+                class="board-card"
+                :data-task-id="task.id"
+                :disabled="movePending"
+                @click="openTaskEdit(task)"
+              >
+                <span class="board-card__topline">
+                  <strong>{{ task.title }}</strong>
+                  <span class="priority-badge">P{{ task.priority }}</span>
+                </span>
+                <span v-if="task.description" class="board-card__description">{{ task.description }}</span>
+              </button>
               <button class="add-item-button" type="button" @click="openTaskCreate(group.column.id)">＋ Add item</button>
-            </div>
+            </VueDraggable>
           </article>
-        </template>
-        <div
-          class="column-drop-zone column-drop-zone--end"
-          :class="{ 'column-drop-zone--active': dragging.kind === 'column' && columnDropTargetId === 'end' }"
-          aria-hidden="true"
-          @dragover="allowColumnContentsDrop($event, 'end')"
-          @drop="dropAtBoardEnd"
-        />
-        <button
-          type="button"
-          class="new-column-button"
-          @click="openColumnCreate"
-          @dragover="allowColumnContentsDrop($event, 'end')"
-          @drop="dropAtBoardEnd"
-        >＋ New column</button>
-      </div>
+        <button type="button" class="new-column-button" @click="openColumnCreate">＋ New column</button>
+      </VueDraggable>
     </div>
 
     <TaskCreateModal
@@ -425,14 +325,11 @@ function clearDrag() {
 .board-page { min-height: calc(100vh - 190px); background: #fff; }
 .board-state { padding: 40px; }
 .board-scroll { min-height: calc(100vh - 190px); overflow-x: auto; padding: 24px 28px 36px; }
-.board-columns { display: flex; align-items: stretch; min-width: max-content; }
-.column-drop-zone { position: relative; width: 12px; min-height: 0; align-self: stretch; border-radius: 6px; transition: background .15s; }
-.column-drop-zone--end { width: 112px; }
-.column-drop-zone:hover { background: #ddf4ff; }
-.column-drop-zone--active::after { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; border-radius: 999px; background: #7dd3fc; content: ''; transform: translateX(-50%); }
-.column-drop-zone--end.column-drop-zone--active::after { left: 0; transform: none; }
-.board-column { width: 344px; min-height: calc(100vh - 250px); display: flex; flex-direction: column; border: 1px solid #d0d7de; border-radius: 10px; background: #f6f8fa; }
-.board-column--drag-source { border-color: #7dd3fc; box-shadow: 0 0 0 1px #7dd3fc; }
+.board-columns { display: flex; align-items: stretch; gap: 16px; min-width: max-content; }
+.board-column { width: 344px; min-height: calc(100vh - 250px); display: flex; flex: none; flex-direction: column; border: 1px solid #d0d7de; border-radius: 10px; background: #f6f8fa; }
+.column-sort-chosen { opacity: .7; }
+.column-sort-ghost { width: 4px !important; min-width: 4px; border: 0; border-radius: 999px; background: #7dd3fc; box-shadow: none; overflow: hidden; opacity: 1; }
+.column-drag-preview { opacity: 0; }
 .board-column__header { min-height: 62px; padding: 14px 12px 12px 16px; display: flex; align-items: center; gap: 9px; }
 .board-column__marker { width: 20px; height: 20px; border: 3px solid #43853d; border-radius: 50%; background: #dafbe1; }
 .board-column__header h2 { flex: 1; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; }
@@ -442,10 +339,9 @@ function clearDrag() {
 .column-menu-handle { cursor: grab; }
 .column-menu-handle:active { cursor: grabbing; }
 .board-column__tasks { min-height: 180px; flex: 1; padding: 0 12px 12px; border-radius: 0 0 10px 10px; }
-.task-drop-zone { height: 8px; border-radius: 4px; transition: background .12s; }
-.task-drop-zone:hover { background: #54aeff; }
-.task-drop-zone--last { height: 12px; }
 .board-card { width: 100%; min-height: 108px; padding: 16px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #d0d7de; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(31,35,40,.08); color: #1f2328; cursor: grab; text-align: left; }
+.task-sort-chosen { opacity: .7; }
+.task-sort-ghost { border: 2px solid #7dd3fc; background: #f0f9ff; box-shadow: none; }
 .board-card:hover { border-color: #8c959f; box-shadow: 0 3px 8px rgba(31,35,40,.12); }
 .board-card:active { cursor: grabbing; }
 .board-card__topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -454,7 +350,6 @@ function clearDrag() {
 .board-card__description { display: -webkit-box; overflow: hidden; color: #57606a; line-height: 1.45; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .add-item-button { width: 100%; min-height: 40px; border: 0; border-radius: 7px; background: transparent; color: #57606a; cursor: pointer; text-align: left; font-size: 15px; }
 .add-item-button:hover { background: #eaeef2; color: #1f2328; }
-.new-column-button { width: 164px; min-height: 46px; align-self: flex-start; padding: 0 16px; border: 1px solid #d0d7de; border-radius: 8px; background: #f6f8fa; color: #1f2328; cursor: pointer; font-weight: 600; text-align: left; }
+.new-column-button { width: 164px; min-height: 46px; align-self: flex-start; flex: none; padding: 0 16px; border: 1px solid #d0d7de; border-radius: 8px; background: #f6f8fa; color: #1f2328; cursor: pointer; font-weight: 600; text-align: left; }
 .new-column-button:hover { background: #eaeef2; }
-@media (prefers-reduced-motion: reduce) { .column-drop-zone, .task-drop-zone { transition: none; } }
 </style>
