@@ -49,6 +49,7 @@ class RepositoryContractTest {
         assertThat(items).contains("order by c.sortOrder asc, c.id asc, t.sortOrder asc, t.id asc");
         assertThat(search).contains("t.projectId = :projectId");
         assertThat(search).contains("lower(t.title) like lower(concat('%', :title, '%'))");
+        assertThat(search).contains("escape '!'");
         assertThat(search).contains("order by c.sortOrder asc, c.id asc, t.sortOrder asc, t.id asc");
         assertThat(owned).contains("t.id = :taskId", "t.projectId = :projectId", "p.user.id = :userId");
     }

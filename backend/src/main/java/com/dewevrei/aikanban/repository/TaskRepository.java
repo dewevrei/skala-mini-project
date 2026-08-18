@@ -26,7 +26,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             select t from Task t
             join t.column c
             where t.projectId = :projectId
-              and lower(t.title) like lower(concat('%', :title, '%'))
+              and lower(t.title) like lower(concat('%', :title, '%')) escape '!'
             order by c.sortOrder asc, c.id asc, t.sortOrder asc, t.id asc
             """)
     List<Task> searchAllForItems(@Param("projectId") Long projectId, @Param("title") String title);
