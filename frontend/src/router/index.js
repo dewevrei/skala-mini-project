@@ -4,15 +4,24 @@ import { useAuthStore } from '../stores/auth'
 const PlaceholderView = () => import('../views/PlaceholderView.vue')
 const LoginView = () => import('../views/LoginView.vue')
 const ProfileView = () => import('../views/ProfileView.vue')
+const ProjectsView = () => import('../views/ProjectsView.vue')
+const ProjectLayout = () => import('../views/ProjectLayout.vue')
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', redirect: '/projects' },
     { path: '/login', name: 'login', component: LoginView, meta: { title: '로그인', public: true } },
-    { path: '/projects', name: 'projects', component: PlaceholderView, meta: { title: '프로젝트' } },
-    { path: '/projects/:projectId/board', name: 'board', component: PlaceholderView, meta: { title: '보드' } },
-    { path: '/projects/:projectId/items', name: 'items', component: PlaceholderView, meta: { title: '작업 목록' } },
+    { path: '/projects', name: 'projects', component: ProjectsView, meta: { title: '프로젝트' } },
+    {
+      path: '/projects/:projectId',
+      component: ProjectLayout,
+      children: [
+        { path: '', redirect: { name: 'board' } },
+        { path: 'board', name: 'board', component: PlaceholderView, meta: { title: '보드' } },
+        { path: 'items', name: 'items', component: PlaceholderView, meta: { title: '작업 목록' } },
+      ],
+    },
     { path: '/profile', name: 'profile', component: ProfileView, meta: { title: '회원정보' } },
   ],
 })
