@@ -24,6 +24,7 @@ const columnName = ref('')
 const columnPending = ref(false)
 const movePending = ref(false)
 const dragging = reactive({ kind: '', id: null, columnId: null })
+const columnDropTargetId = ref(null)
 const projectId = computed(() => route.params.projectId)
 
 async function fetchBoard({ quiet = false } = {}) {
@@ -146,8 +147,13 @@ function startColumnDrag(event, columnId) {
   dragging.kind = 'column'
   dragging.id = columnId
   dragging.columnId = null
+  columnDropTargetId.value = null
   event.dataTransfer.effectAllowed = 'move'
   event.dataTransfer.setData('application/x-ai-kanban-column', String(columnId))
+  const dragPreview = document.createElement('canvas')
+  dragPreview.width = 1
+  dragPreview.height = 1
+  event.dataTransfer.setDragImage(dragPreview, 0, 0)
 }
 
 async function dropColumnBefore(targetColumnId) {
@@ -238,10 +244,13 @@ function allowDrop(event, kind) {
   }
 }
 
-function allowColumnContentsDrop(event) {
+function allowColumnContentsDrop(event, targetColumnId = null) {
   if ((dragging.kind === 'task' || dragging.kind === 'column') && !movePending.value) {
     event.preventDefault()
     event.dataTransfer.dropEffect = 'move'
+    if (dragging.kind === 'column' && targetColumnId !== null) {
+      columnDropTargetId.value = String(targetColumnId)
+    }
   }
 }
 
@@ -263,6 +272,7 @@ function clearDrag() {
   dragging.kind = ''
   dragging.id = null
   dragging.columnId = null
+  columnDropTargetId.value = null
 }
 </script>
 
@@ -279,14 +289,15 @@ function clearDrag() {
         <template v-for="group in groups" :key="group.column.id">
           <div
             class="column-drop-zone"
+            :class="{ 'column-drop-zone--active': dragging.kind === 'column' && columnDropTargetId === String(group.column.id) }"
             aria-hidden="true"
-            @dragover="allowColumnContentsDrop($event)"
+            @dragover="allowColumnContentsDrop($event, group.column.id)"
             @drop="dropOnColumn(group.column.id)"
           />
           <article
             class="board-column"
             :class="{ 'board-column--drag-source': dragging.kind === 'task' && String(dragging.columnId) === String(group.column.id) }"
-            @dragover="allowColumnContentsDrop($event)"
+            @dragover="allowColumnContentsDrop($event, group.column.id)"
             @drop="dropOnColumn(group.column.id)"
           >
             <header class="board-column__header">
@@ -340,12 +351,18 @@ function clearDrag() {
             </div>
           </article>
         </template>
-        <div class="column-drop-zone" aria-hidden="true" @dragover="allowColumnContentsDrop($event)" @drop="dropAtBoardEnd" />
+        <div
+          class="column-drop-zone"
+          :class="{ 'column-drop-zone--active': dragging.kind === 'column' && columnDropTargetId === 'end' }"
+          aria-hidden="true"
+          @dragover="allowColumnContentsDrop($event, 'end')"
+          @drop="dropAtBoardEnd"
+        />
         <button
           type="button"
           class="new-column-button"
           @click="openColumnCreate"
-          @dragover="allowColumnContentsDrop($event)"
+          @dragover="allowColumnContentsDrop($event, 'end')"
           @drop="dropAtBoardEnd"
         >＋ New column</button>
       </div>
@@ -393,8 +410,9 @@ function clearDrag() {
 .board-state { padding: 40px; }
 .board-scroll { min-height: calc(100vh - 190px); overflow-x: auto; padding: 24px 28px 36px; }
 .board-columns { display: flex; align-items: flex-start; min-width: max-content; }
-.column-drop-zone { width: 12px; min-height: 620px; border-radius: 6px; transition: background .15s; }
+.column-drop-zone { position: relative; width: 12px; min-height: 620px; border-radius: 6px; transition: background .15s; }
 .column-drop-zone:hover { background: #ddf4ff; }
+.column-drop-zone--active::after { position: absolute; top: 8px; bottom: 8px; left: 50%; width: 2px; border-radius: 999px; background: #7dd3fc; content: ''; transform: translateX(-50%); }
 .board-column { width: 344px; min-height: calc(100vh - 250px); display: flex; flex-direction: column; border: 1px solid #d0d7de; border-radius: 10px; background: #f6f8fa; }
 .board-column--drag-source { border-color: #7dd3fc; box-shadow: 0 0 0 1px #7dd3fc; }
 .board-column__header { min-height: 62px; padding: 14px 12px 12px 16px; display: flex; align-items: center; gap: 9px; }
