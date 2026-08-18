@@ -91,7 +91,7 @@ function cancelAfterSuccess() {
   >
     <el-form label-position="top" @submit.prevent="create">
       <el-form-item label="제목" required>
-        <el-input v-model="form.title" maxlength="255" show-word-limit autofocus />
+        <el-input v-model="form.title" maxlength="200" show-word-limit autofocus />
       </el-form-item>
       <el-form-item label="설명">
         <el-input
