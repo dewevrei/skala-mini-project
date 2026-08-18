@@ -78,8 +78,16 @@ select {
 
 .google-login {
   width: 100%;
-  background: #1f6f43;
-  border-color: #1f6f43;
+  background: #fff;
+  border-color: #43853d;
+  color: #1f2328;
+}
+
+.google-login:hover,
+.google-login:focus-visible {
+  background: #dafbe1;
+  border-color: #2f7d32;
+  color: #1f2328;
 }
 
 .profile-page {
