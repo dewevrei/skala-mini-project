@@ -505,7 +505,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 
 .add-item-button {
   width: 100%;
-  min-height: 46px;
+  min-height: 40px;
   padding: 0 28px;
   border: 0;
   border-bottom: 1px solid #d0d7de;
