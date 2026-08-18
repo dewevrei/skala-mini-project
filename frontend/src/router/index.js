@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
-const PlaceholderView = () => import('../views/PlaceholderView.vue')
 const LoginView = () => import('../views/LoginView.vue')
 const ProfileView = () => import('../views/ProfileView.vue')
 const ProjectsView = () => import('../views/ProjectsView.vue')
 const ProjectLayout = () => import('../views/ProjectLayout.vue')
+const BoardView = () => import('../views/BoardView.vue')
+const ItemsView = () => import('../views/ItemsView.vue')
 
 const router = createRouter({
   history: createWebHistory(),
@@ -18,8 +19,8 @@ const router = createRouter({
       component: ProjectLayout,
       children: [
         { path: '', redirect: { name: 'board' } },
-        { path: 'board', name: 'board', component: PlaceholderView, meta: { title: '보드' } },
-        { path: 'items', name: 'items', component: PlaceholderView, meta: { title: '작업 목록' } },
+        { path: 'board', name: 'board', component: BoardView, meta: { title: '보드' } },
+        { path: 'items', name: 'items', component: ItemsView, meta: { title: '작업 목록' } },
       ],
     },
     { path: '/profile', name: 'profile', component: ProfileView, meta: { title: '회원정보' } },
