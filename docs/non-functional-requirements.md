@@ -9,7 +9,7 @@
 |---|---|---|---|---|---|
 | REQ-NFN-001 | 기술 스택 준수 | Frontend는 Vue.js 3, SFC, Vite, Composition API, Pinia, Vue Router, Axios, Element Plus를 사용하고 Backend는 Java 25, Spring Boot 4.1.0, Spring Security 7, Spring Data JPA, Spring Session Data Redis, Maven을 사용한다. | 필수 | 중간 | 대체 스택 사용 금지 |
 | REQ-NFN-002 | 분리형 구조 | 프런트엔드와 백엔드는 분리된 애플리케이션으로 구성하고 REST API로 통신한다. | 필수 | 중간 | 로컬 개발 포트 분리 |
-| REQ-NFN-003 | 데이터베이스 고정 | MySQL 8.0.46을 사용한다. 스키마 DDL은 사용자가 MySQL Workbench로 직접 적용한다. | 필수 | 중간 | 자동 마이그레이션 도구 사용 안 함 |
+| REQ-NFN-003 | 데이터베이스 고정 | MySQL 8.4.11(`mysql:8.4.11`)을 사용한다. 스키마 DDL은 사용자가 MySQL Workbench로 직접 적용한다. | 필수 | 중간 | 자동 마이그레이션 도구 사용 안 함 |
 | REQ-NFN-004 | 스키마 검증 | JPA `ddl-auto=validate`를 사용해 시작 시 엔티티와 실제 스키마 불일치를 탐지하고 불일치 시 실행을 중단한다. | 필수 | 낮음 | 자동 생성·수정 금지 |
 | REQ-NFN-005 | 인증 보안 | Google OAuth 2.0 로그인 후 Redis 기반 서버 세션과 `HttpOnly` 세션 쿠키를 사용한다. JWT를 발급하지 않는다. | 필수 | 높음 | Spring Security 7 + Spring Session Data Redis |
 | REQ-NFN-006 | CSRF 보호 | 상태 변경 REST 요청에는 CSRF 토큰을 요구하고 검증 실패 시 `403`을 반환한다. | 필수 | 높음 | Axios가 토큰 헤더 전송 |
@@ -21,7 +21,7 @@
 | REQ-NFN-012 | 정렬 결정성 | 열은 `sortOrder, id`, 카드는 `sortOrder, id` 순으로 조회해 동률에도 결과가 결정적이어야 한다. | 필수 | 중간 | 이동 후 순번 정규화 가능 |
 | REQ-NFN-013 | AI 장애 내성 | AI 호출·응답 검증 실패가 일반 작업 등록 기능 전체의 장애로 번지지 않도록 확정된 대체 저장을 수행한다. | 필수 | 높음 | DB 저장 실패는 대체 대상 아님 |
 | REQ-NFN-014 | API 일관성 | OAuth 리다이렉트 외 JSON API는 동일한 `ApiResponse<T>` 봉투와 의미에 맞는 HTTP 상태 코드를 사용한다. | 필수 | 중간 | 오류 `data`는 항상 `null` |
-| REQ-NFN-015 | 로컬 실행 환경 | MVP는 Frontend `localhost:5173`, Backend `localhost:8080`, MySQL `localhost:3306`, Redis `localhost:6379` 기본 구성을 대상으로 한다. | 필수 | 낮음 | 연결값은 환경 설정으로 주입 가능 |
+| REQ-NFN-015 | 로컬 실행 환경 | MVP는 Frontend `localhost:5173`, Backend `localhost:8080`, MySQL host `localhost:13306`(container `3306`), Redis `localhost:6379` 기본 구성을 대상으로 한다. | 필수 | 낮음 | 연결값은 환경 설정으로 주입 가능 |
 | REQ-NFN-016 | 프런트엔드 검증 | 프런트엔드는 프로덕션 빌드가 성공해야 한다. 자동 단위·컴포넌트·브라우저 테스트는 작성하지 않는다. | 필수 | 낮음 | `npm run build` |
 | REQ-NFN-017 | 백엔드 검증 | 백엔드는 서비스 메서드 단위 테스트만 작성하고 통과시켜야 한다. 컨트롤러·보안·DB 연동 자동 테스트는 범위 밖이다. | 필수 | 중간 | `./mvnw test` |
 | REQ-NFN-018 | 외부 API 테스트 격리 | 서비스 단위 테스트에서 Google OAuth와 Gemini를 실제 호출하지 않고 테스트 대역을 사용한다. | 필수 | 중간 | 비용·불안정성 차단 |

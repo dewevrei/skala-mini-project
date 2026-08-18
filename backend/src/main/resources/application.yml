@@ -2,7 +2,7 @@ spring:
   application:
     name: ai-kanban
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/ai_kanban?connectionTimeZone=Asia/Seoul&forceConnectionTimeZoneToSession=true&characterEncoding=UTF-8}
+    url: ${DB_URL:jdbc:mysql://localhost:13306/ai_kanban?connectionTimeZone=Asia/Seoul&forceConnectionTimeZoneToSession=true&characterEncoding=UTF-8}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
   jpa:

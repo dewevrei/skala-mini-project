@@ -39,14 +39,14 @@ Frontend build에는 의존성의 `/* #__PURE__ */` 주석 제거 안내와 500 
 ## 실행 환경 확인
 
 - `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GEMINI_API_KEY`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_USERNAME`, `REDIS_PASSWORD`: 모두 미설정.
-- `localhost:3306`, `localhost:6379`: listening process 없음.
+- `localhost:13306`, `localhost:6379`: listening process 없음.
 - 따라서 실제 secret 값을 요구하거나 출력하지 않았고, 외부 연동이 필요한 검증은 실행하지 않았다.
 
 ## PENDING 수동 검증
 
 ### PENDING — MySQL/JPA schema validation과 runtime smoke
 
-필요 환경: MySQL `8.0.46`, 사용자가 관리하는 DB 계정, Java 25, Redis 8.8, OAuth/Gemini 환경 변수.
+필요 환경: MySQL `8.4.11` Docker(`database/mysql/Dockerfile`, host `13306`→container `3306`), 사용자가 관리하는 DB 계정, Java 25, Redis 8.8, OAuth/Gemini 환경 변수.
 
 1. MySQL Workbench에서 `database/ai_kanban.sql`을 사용자가 직접 실행한다. 애플리케이션이 DDL을 실행하게 하지 않는다.
 2. 새 terminal/session에 `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`를 주입한다. 값은 문서나 Git에 남기지 않는다.

@@ -1,7 +1,7 @@
 # ERD
 
 문서 상태: 구현 계약 확정본  
-DBMS: MySQL 8.0.46  
+DBMS: MySQL 8.4.11 (`mysql:8.4.11`)
 스키마 적용: 사용자가 MySQL Workbench에서 직접 실행
 
 Redis Open Source 8.8은 Spring Session 인증 상태만 저장하며 RDB 도메인 ERD와 DDL에는 포함하지 않는다.
