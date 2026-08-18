@@ -380,7 +380,9 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 
 .items-group__header h3 {
   margin: 0;
+  color: #24292f;
   font-size: 19px;
+  font-weight: 500;
 }
 
 .status-marker {
