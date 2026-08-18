@@ -53,6 +53,8 @@
 | REQ-FUNC-039 | 인증 화면 이동 | Google 로그인 성공 시 `/projects`, OAuth 실패 시 `/login?error=oauth`, 로그아웃 성공 시 `/login`으로 이동해야 한다. | 높음 | 낮음 | Redis 장애 callback은 `/login?error=session-service-unavailable` |
 | REQ-FUNC-040 | Task 등록 취소 | Board 또는 Items의 공통 Task 등록 modal/overlay에서 `Cancel`을 누르면 일반 Create·AI Generate 모두 입력 변경 여부와 관계없이 확인창 없이 입력을 폐기하고 등록을 시작한 화면을 그대로 보여줘야 한다. | 높음 | 낮음 | 별도 등록 route 없음 |
 | REQ-FUNC-041 | 작업 시작일·종료일 | 모든 Task는 서로 독립적으로 `null`일 수 있는 `startDate`, `endDate`를 가진다. 일반·AI·fallback 생성 시 두 값은 모두 `null`이며, 사용자는 Items 화면에서 각 값을 직접 지정하거나 비울 수 있어야 한다. | 필수 | 중간 | 날짜 선후관계를 제한하지 않아 종료일이 시작일보다 앞서도 허용 |
+| REQ-FUNC-042 | 공통 Task 등록 action | Board/Items의 하나의 Task 등록 modal 하단에 `Cancel`, `Create`, `AI Generate` 버튼을 인접 배치한다. 별도 AI 화면이나 모드 전환은 만들지 않으며, Create는 선택 Column 일반 등록, AI Generate는 같은 입력으로 현재 첫 Column AI 등록을 수행한다. | 필수 | 낮음 | Create는 제목 필수·설명 선택, AI Generate는 둘 다 필수 |
+| REQ-FUNC-043 | 공통 편집 화면 형태 | Project 생성·수정과 Task 수정은 Task 등록 화면과 유사한 큰 modal/overlay 구조와 하단 action 영역을 사용한다. | 높음 | 낮음 | Element Plus 기반 데스크톱 UI |
 
 ## 명시적 범위 제외
 

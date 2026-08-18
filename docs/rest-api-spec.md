@@ -38,6 +38,7 @@ public record ApiResponse<T>(
 - 실패 응답: `success=false`, `data=null`
 - HTTP 상태 코드는 결과 의미에 맞게 사용한다.
 - 날짜·시간은 ISO-8601 문자열로 반환한다.
+- Backend와 MySQL 연결의 기준 시간대는 `Asia/Seoul`이며 `createdAt`, `updatedAt`은 `+09:00` offset을 포함해 반환한다.
 - 클라이언트 요청에 `userId`를 받지 않는다. 로그인 세션에서 사용자를 결정한다.
 - 생성 API는 `201 Created`, 조회·수정·삭제는 body가 있으므로 `200 OK`를 사용한다.
 - `code`는 접두사 없는 대문자 `UPPER_SNAKE_CASE`이며 이 문서와 오류 명세에 정의된 문자열을 안정적으로 유지한다.
@@ -317,6 +318,7 @@ AI 생성 응답은 성공·fallback 모두 같은 형태다. fallback 여부를
 | 회원정보 변경 | `/profile` |
 
 Task 등록은 별도 route가 아니라 시작한 Board/Items 위의 공통 modal 또는 overlay로 제공한다. 따라서 `Cancel`은 route history를 추측하지 않고 modal을 닫아 현재 시작 화면을 그대로 보여준다.
+공통 modal은 같은 title/description 입력 아래 하단 action 영역에 `Cancel`, `Create`, `AI Generate`를 인접 배치한다. `Create`는 시작 Column의 일반 생성 API를, `AI Generate`는 Project의 AI 생성 API를 호출하며 별도 AI route·화면·모드 전환은 두지 않는다.
 
 ## 세션 저장소 장애
 

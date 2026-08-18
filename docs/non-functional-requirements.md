@@ -15,7 +15,7 @@
 | REQ-NFN-006 | CSRF 보호 | 상태 변경 REST 요청에는 CSRF 토큰을 요구하고 검증 실패 시 `403`을 반환한다. | 필수 | 높음 | Axios가 토큰 헤더 전송 |
 | REQ-NFN-007 | CORS 최소 허용 | 로컬 개발에서는 `http://localhost:5173`만 자격 증명 포함 CORS 원본으로 허용한다. | 필수 | 중간 | 운영 CORS는 MVP 범위 밖 |
 | REQ-NFN-008 | 자원 소유권 보호 | 서버의 모든 프로젝트·열·작업 접근에서 로그인 사용자 소유권을 검증한다. 클라이언트가 전달한 사용자 ID를 신뢰하지 않는다. | 필수 | 높음 | 타인 자원은 `404` 처리 |
-| REQ-NFN-009 | 비밀정보 보호 | Google OAuth 비밀키, Gemini API 키와 Redis 비밀번호가 있는 경우 이를 환경 설정으로 주입하고 코드·Git·응답·일반 로그에 기록하지 않는다. | 필수 | 중간 | 로컬 환경 파일도 커밋 금지 |
+| REQ-NFN-009 | 비밀정보 보호 | DB 접속정보, Google OAuth 비밀키, Gemini API 키와 Redis 비밀번호가 있는 경우 이를 Spring Boot 환경 변수로 주입하고 코드·Git·응답·일반 로그에 기록하지 않는다. | 필수 | 중간 | 로컬 환경 파일도 커밋 금지 |
 | REQ-NFN-010 | 트랜잭션 원자성 | 프로젝트와 기본 열 생성, AI 다중 작업 저장, 열/프로젝트 연쇄 삭제는 각각 하나의 트랜잭션으로 처리한다. | 필수 | 높음 | AI DB 실패 시 전체 롤백 |
 | REQ-NFN-011 | 동시 수정 정책 | 일반 변경은 별도 사용자 잠금이나 버전 충돌 응답 없이 마지막으로 서버에 반영된 결과를 사용한다. 최소 한 Column 불변식을 지키기 위한 삭제 트랜잭션의 짧은 DB 행 잠금은 허용한다. | 높음 | 중간 | 개인 보드·다중 탭 기준 |
 | REQ-NFN-012 | 정렬 결정성 | 열은 `sortOrder, id`, 카드는 `sortOrder, id` 순으로 조회해 동률에도 결과가 결정적이어야 한다. | 필수 | 중간 | 이동 후 순번 정규화 가능 |
@@ -36,6 +36,8 @@
 | REQ-NFN-027 | 기본 접근성 | 키보드 포커스 표시, 입력 항목의 이름 연결, 기본 색상 대비를 적용한다. | 높음 | 낮음 | 특정 접근성 인증 등급 준수는 범위 밖 |
 | REQ-NFN-028 | AI 호출 설정 | Gemini 호출당 timeout 30초, temperature 0.2, topP 0.9, 최대 출력 8,192 tokens를 사용하며 안전 설정은 별도로 덮어쓰지 않는다. | 필수 | 중간 | topK 등 미지정 항목은 모델 기본값 |
 | REQ-NFN-029 | UI 구성 기준 | Element Plus 컴포넌트를 기반으로 GitHub Projects와 유사한 정보 구조와 시각적 밀도를 제공한다. | 높음 | 중간 | GitHub 화면의 미요청 기능을 복제하지 않으며 공식 지원 범위는 데스크톱 |
+| REQ-NFN-030 | 시간대 일관성 | Backend 기본 시간대와 MySQL 연결 시간대를 `Asia/Seoul`로 고정하고 API timestamp는 ISO-8601 `+09:00` offset을 포함한다. | 필수 | 낮음 | DB `DATETIME(6)`은 서울 기준 local datetime으로 해석 |
+| REQ-NFN-031 | UI 참고 범위 | 제공된 Project 목록·Board·Items·Column 추가·Task 추가 이미지는 배치와 밀도 참고용이며, Open/Closed·Private·검색·정렬, Column 색상·설명·숨김, Estimate, New view, Insights, Workflows, 첨부·Markdown 등 명세 밖 기능은 구현하지 않는다. | 필수 | 낮음 | 화면 이미지는 새 제품 기능의 근거가 아님 |
 
 ## 품질 목표의 경계
 

@@ -138,7 +138,9 @@
 ## Frontend 입력 상태
 
 - 필수값이 없으면 API 요청을 보내지 않고 메시지를 표시한다.
-- 생성 요청 중 `Create` 또는 `AI Generate` 버튼을 비활성화한다.
+- 하나의 Task 등록 modal 하단에 `Cancel`, `Create`, `AI Generate`를 인접 배치하며 별도 AI 화면이나 모드 전환을 만들지 않는다.
+- `Create`는 title만 필수이고 description은 선택이다. `AI Generate`는 같은 입력의 title과 description이 모두 필수다.
+- 생성 요청 중 `Create`와 `AI Generate` 버튼을 모두 비활성화하고 요청 중인 버튼에 진행 상태를 표시한다.
 - AI fallback은 정상 생성 응답처럼 처리하고 별도 경고를 표시하지 않는다.
 - 서버 실패 응답은 `message`를 사용자에게 표시한다.
 - Task 등록 `Cancel`은 dirty 여부를 검사하거나 확인창을 띄우지 않고 입력을 폐기한 뒤 시작한 Board/Items로 돌아간다.

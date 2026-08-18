@@ -25,6 +25,9 @@
 - Spring AI 2.0.x BOM과 Google GenAI starter
 - Spring Session Data Redis와 Redis Open Source 8.8 세션 저장소
 - 로컬 포트, CORS, 세션, CSRF, MySQL·Redis 연결, 환경 변수 자리 구성
+- DB 접속정보와 Google OAuth·Gemini API 자격 증명의 Spring Boot 환경 변수 구성
+- Backend 기본 시간대·MySQL 연결 시간대 `Asia/Seoul`, API timestamp `+09:00` 구성
+- Workbench 수동 적용용 `database/ai_kanban.sql` 제공
 - 공통 `ApiResponse<T>`와 `ApiCode` 기반 마련
 - `ddl-auto=validate`
 
@@ -174,6 +177,8 @@ Gemini 구조화 출력으로 평면 Task 목록을 만들고 확정된 실패 �
 - 닉네임 변경 화면
 - Project 생성·수정·삭제 경고 모달
 - Element Plus 공통 컴포넌트와 GitHub Projects 유사 정보 구조·시각 밀도 적용
+- Project 생성·수정과 Task 수정은 Task 등록 화면과 유사한 큰 modal/overlay로 구성
+- 참고 이미지의 명세 밖 기능은 제외
 - Task 등록 Cancel은 확인창 없이 입력을 폐기하고 시작한 Board/Items로 복귀
 - 탭 활성화 시 최신 Project 재조회
 - 최소 1280px 최신 Chrome 데스크톱 UI와 기본 포커스·label·색 대비
@@ -198,7 +203,8 @@ Gemini 구조화 출력으로 평면 Task 목록을 만들고 확정된 실패 �
 - Status 선택 → 대상 Column 맨 아래
 - startDate/endDate 열에서 날짜를 직접 지정하거나 비우기
 - Task 수정·삭제 모달
-- 별도 AI Generate 진입 및 요청 중 버튼 비활성화
+- Task 등록 modal 하단 `Cancel`, `Create`, `AI Generate` 인접 배치; 별도 AI 화면·모드 전환 없음
+- 요청 중 Create·AI Generate 동시 비활성화와 요청 버튼 진행 표시
 
 ### 검증
 
