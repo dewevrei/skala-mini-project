@@ -368,7 +368,7 @@ function clearDrag() {
           </article>
         </template>
         <div
-          class="column-drop-zone"
+          class="column-drop-zone column-drop-zone--end"
           :class="{ 'column-drop-zone--active': dragging.kind === 'column' && columnDropTargetId === 'end' }"
           aria-hidden="true"
           @dragover="allowColumnContentsDrop($event, 'end')"
@@ -427,8 +427,10 @@ function clearDrag() {
 .board-scroll { min-height: calc(100vh - 190px); overflow-x: auto; padding: 24px 28px 36px; }
 .board-columns { display: flex; align-items: stretch; min-width: max-content; }
 .column-drop-zone { position: relative; width: 12px; min-height: 0; align-self: stretch; border-radius: 6px; transition: background .15s; }
+.column-drop-zone--end { width: 112px; }
 .column-drop-zone:hover { background: #ddf4ff; }
 .column-drop-zone--active::after { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; border-radius: 999px; background: #7dd3fc; content: ''; transform: translateX(-50%); }
+.column-drop-zone--end.column-drop-zone--active::after { left: 0; transform: none; }
 .board-column { width: 344px; min-height: calc(100vh - 250px); display: flex; flex-direction: column; border: 1px solid #d0d7de; border-radius: 10px; background: #f6f8fa; }
 .board-column--drag-source { border-color: #7dd3fc; box-shadow: 0 0 0 1px #7dd3fc; }
 .board-column__header { min-height: 62px; padding: 14px 12px 12px 16px; display: flex; align-items: center; gap: 9px; }
