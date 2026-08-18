@@ -332,7 +332,7 @@ function applyAffectedGroups(affected) {
 .column-drag-preview { width: 344px; border: 1px solid #7dd3fc; border-radius: 10px; background: #f6f8fa; box-shadow: 0 8px 20px rgba(31, 35, 40, .18); }
 .board-column__header { min-height: 62px; padding: 14px 12px 12px 16px; display: flex; align-items: center; gap: 9px; }
 .board-column__marker { width: 20px; height: 20px; border: 3px solid #43853d; border-radius: 50%; background: #dafbe1; }
-.board-column__header h2 { flex: 1; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; }
+.board-column__header h2 { flex: 1; min-width: 0; margin: 0; overflow: hidden; color: #24292f; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; font-weight: 500; }
 .board-column__count { min-width: 27px; padding: 2px 8px; border-radius: 999px; background: #eaeef2; color: #57606a; text-align: center; font-size: 13px; }
 .icon-button { min-width: 30px; min-height: 30px; padding: 2px; border: 0; border-radius: 6px; background: transparent; color: #57606a; cursor: pointer; font-size: 20px; }
 .icon-button:hover { background: #eaeef2; color: #1f2328; }
@@ -345,7 +345,7 @@ function applyAffectedGroups(affected) {
 .board-card:hover { border-color: #8c959f; box-shadow: 0 3px 8px rgba(31,35,40,.12); }
 .board-card:active { cursor: grabbing; }
 .board-card__topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.board-card__topline strong { overflow-wrap: anywhere; font-size: 16px; line-height: 1.35; }
+.board-card__topline strong { overflow-wrap: anywhere; font-size: 16px; font-weight: 500; line-height: 1.35; }
 .priority-badge { flex: none; padding: 2px 7px; border: 1px solid #d0d7de; border-radius: 999px; color: #57606a; background: #f6f8fa; font-size: 12px; font-weight: 650; }
 .board-card__description { display: -webkit-box; overflow: hidden; color: #57606a; line-height: 1.45; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .add-item-button { width: 100%; min-height: 40px; border: 0; border-radius: 7px; background: transparent; color: #57606a; cursor: pointer; opacity: 0; pointer-events: none; text-align: left; transition: opacity .12s; font-size: 15px; }
