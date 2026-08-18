@@ -328,8 +328,8 @@ function applyAffectedGroups(affected) {
 .board-columns { display: flex; align-items: stretch; gap: 16px; min-width: max-content; }
 .board-column { width: 344px; min-height: calc(100vh - 250px); display: flex; flex: none; flex-direction: column; border: 1px solid #d0d7de; border-radius: 10px; background: #f6f8fa; }
 .column-sort-chosen { opacity: .7; }
-.column-sort-ghost { width: 4px !important; min-width: 4px; border: 0; border-radius: 999px; background: #7dd3fc; box-shadow: none; overflow: hidden; opacity: 1; }
-.column-drag-preview { opacity: 0; }
+.column-sort-ghost { border-color: #7dd3fc; background: #f0f9ff; box-shadow: 0 0 0 1px #7dd3fc; opacity: .35; }
+.column-drag-preview { width: 344px; border: 1px solid #7dd3fc; border-radius: 10px; background: #f6f8fa; box-shadow: 0 8px 20px rgba(31, 35, 40, .18); }
 .board-column__header { min-height: 62px; padding: 14px 12px 12px 16px; display: flex; align-items: center; gap: 9px; }
 .board-column__marker { width: 20px; height: 20px; border: 3px solid #43853d; border-radius: 50%; background: #dafbe1; }
 .board-column__header h2 { flex: 1; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; }
