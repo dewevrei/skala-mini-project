@@ -212,7 +212,19 @@ select {
   color: #57606a;
 }
 
-.new-project-button,
+.new-project-button {
+  background: #fff;
+  border-color: #43853d;
+  color: #1f2328;
+}
+
+.new-project-button:hover,
+.new-project-button:focus-visible {
+  background: #dafbe1;
+  border-color: #2f7d32;
+  color: #1f2328;
+}
+
 .entity-dialog .el-button--primary {
   background: #43853d;
   border-color: #397535;
