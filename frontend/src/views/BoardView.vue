@@ -163,6 +163,10 @@ async function dropColumnBefore(targetColumnId) {
   const rest = groups.value.filter(({ column }) => String(column.id) !== String(dragging.id))
   const targetIndex = rest.findIndex(({ column }) => String(column.id) === String(targetColumnId))
   rest.splice(targetIndex, 0, moving)
+  if (rest.every((group, index) => String(group.column.id) === String(previous[index].column.id))) {
+    clearDrag()
+    return
+  }
   groups.value = rest
   movePending.value = true
   try {
