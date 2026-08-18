@@ -38,7 +38,6 @@ function editProject(project) {
       <div class="projects-toolbar">
         <div>
           <h1>프로젝트</h1>
-          <p>최근에 만든 프로젝트부터 표시됩니다.</p>
         </div>
         <el-button class="new-project-button" type="primary" size="large" @click="createProject">New project</el-button>
       </div>
@@ -62,7 +61,6 @@ function editProject(project) {
               </button>
             </h2>
             <p v-if="project.description">{{ project.description }}</p>
-            <p v-else class="project-row__muted">설명이 없습니다.</p>
           </div>
           <el-button text circle aria-label="프로젝트 수정" @click="editProject(project)">•••</el-button>
         </article>
