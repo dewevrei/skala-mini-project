@@ -286,7 +286,6 @@ function clearDrag() {
             </header>
             <div
               class="board-column__tasks"
-              :class="{ 'board-column__tasks--drop-target': dragging.kind === 'task' && !movePending }"
               @dragover="allowDrop($event, 'task')"
               @drop="dropTask(group.column.id, null)"
             >
@@ -371,8 +370,7 @@ function clearDrag() {
 .icon-button:hover, .column-drag-handle:hover { background: #eaeef2; color: #1f2328; }
 .column-drag-handle { cursor: grab; font-size: 15px; letter-spacing: -3px; }
 .column-drag-handle:active { cursor: grabbing; }
-.board-column__tasks { min-height: 180px; flex: 1; padding: 0 12px 12px; border-radius: 0 0 10px 10px; transition: background .12s, outline-color .12s; }
-.board-column__tasks--drop-target { background: rgba(84, 174, 255, .08); outline: 2px dashed #54aeff; outline-offset: -4px; }
+.board-column__tasks { min-height: 180px; flex: 1; padding: 0 12px 12px; }
 .task-drop-zone { height: 8px; border-radius: 4px; transition: background .12s; }
 .task-drop-zone:hover { background: #54aeff; }
 .task-drop-zone--last { height: 12px; }
