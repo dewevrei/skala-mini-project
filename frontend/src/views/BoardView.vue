@@ -300,7 +300,7 @@ function clearDrag() {
     <el-result v-else-if="errorMessage" icon="error" title="Board를 불러오지 못했습니다" :sub-title="errorMessage">
       <template #extra><el-button type="primary" @click="fetchBoard()">다시 시도</el-button></template>
     </el-result>
-    <div v-else class="board-scroll">
+    <div v-else class="board-scroll" @drop.self="dropAtBoardEnd">
       <div class="board-columns">
         <template v-for="group in groups" :key="group.column.id">
           <div
