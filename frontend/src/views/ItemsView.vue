@@ -21,6 +21,7 @@ const loadError = ref('')
 const createColumnId = ref(null)
 const editingTask = ref(null)
 const pendingTasks = ref(new Set())
+const collapsedColumnIds = ref(new Set())
 let searchTimer
 let requestSequence = 0
 
@@ -37,6 +38,18 @@ function setTaskPending(taskId, pending) {
 
 function isTaskPending(taskId) {
   return pendingTasks.value.has(taskId)
+}
+
+function isColumnCollapsed(columnId) {
+  return collapsedColumnIds.value.has(String(columnId))
+}
+
+function toggleColumn(columnId) {
+  const id = String(columnId)
+  const next = new Set(collapsedColumnIds.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  collapsedColumnIds.value = next
 }
 
 async function refreshItems({ quiet = false } = {}) {
@@ -196,6 +209,16 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
           :aria-labelledby="`items-group-${group.column.id}`"
         >
           <header class="items-group__header">
+            <button
+              class="items-group__toggle"
+              type="button"
+              :aria-controls="`items-group-content-${group.column.id}`"
+              :aria-expanded="!isColumnCollapsed(group.column.id)"
+              :aria-label="`${group.column.name} ${isColumnCollapsed(group.column.id) ? '펼치기' : '접기'}`"
+              @click="toggleColumn(group.column.id)"
+            >
+              <span :class="{ 'items-group__chevron--collapsed': isColumnCollapsed(group.column.id) }" aria-hidden="true">∨</span>
+            </button>
             <span
               class="status-marker"
               :class="`status-marker--${groupIndex % 6}`"
@@ -205,67 +228,69 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
             <span class="task-count" :aria-label="`${group.tasks.length}개 Task`">{{ group.tasks.length }}</span>
           </header>
 
-          <div
-            v-for="task in group.tasks"
-            :key="task.id"
-            class="items-row"
-            role="row"
-            :aria-busy="isTaskPending(task.id)"
-          >
-            <div class="items-title-cell" role="cell">
-              <button class="task-title-button" type="button" @click="openEdit(task)">
-                {{ task.title }}
-              </button>
-            </div>
-            <div role="cell">
-              <el-select
-                :model-value="task.columnId"
-                :disabled="isTaskPending(task.id)"
-                :aria-label="`${task.title} 상태`"
-                @change="changeStatus(task, $event)"
-              >
-                <el-option
-                  v-for="column in statusOptions"
-                  :key="column.id"
-                  :label="column.name"
-                  :value="column.id"
+          <div v-if="!isColumnCollapsed(group.column.id)" :id="`items-group-content-${group.column.id}`">
+            <div
+              v-for="task in group.tasks"
+              :key="task.id"
+              class="items-row"
+              role="row"
+              :aria-busy="isTaskPending(task.id)"
+            >
+              <div class="items-title-cell" role="cell">
+                <button class="task-title-button" type="button" @click="openEdit(task)">
+                  {{ task.title }}
+                </button>
+              </div>
+              <div role="cell">
+                <el-select
+                  :model-value="task.columnId"
+                  :disabled="isTaskPending(task.id)"
+                  :aria-label="`${task.title} 상태`"
+                  @change="changeStatus(task, $event)"
+                >
+                  <el-option
+                    v-for="column in statusOptions"
+                    :key="column.id"
+                    :label="column.name"
+                    :value="column.id"
+                  />
+                </el-select>
+              </div>
+              <div class="priority-cell" role="cell" :aria-label="`우선순위 ${task.priority}`">
+                {{ task.priority }}
+              </div>
+              <div role="cell">
+                <el-date-picker
+                  :model-value="task.startDate"
+                  type="date"
+                  value-format="YYYY-MM-DD"
+                  format="YYYY-MM-DD"
+                  clearable
+                  :disabled="isTaskPending(task.id)"
+                  :aria-label="`${task.title} 시작일`"
+                  placeholder="날짜 선택"
+                  @change="updateDates(task, 'startDate', $event)"
                 />
-              </el-select>
+              </div>
+              <div role="cell">
+                <el-date-picker
+                  :model-value="task.endDate"
+                  type="date"
+                  value-format="YYYY-MM-DD"
+                  format="YYYY-MM-DD"
+                  clearable
+                  :disabled="isTaskPending(task.id)"
+                  :aria-label="`${task.title} 종료일`"
+                  placeholder="날짜 선택"
+                  @change="updateDates(task, 'endDate', $event)"
+                />
+              </div>
             </div>
-            <div class="priority-cell" role="cell" :aria-label="`우선순위 ${task.priority}`">
-              {{ task.priority }}
-            </div>
-            <div role="cell">
-              <el-date-picker
-                :model-value="task.startDate"
-                type="date"
-                value-format="YYYY-MM-DD"
-                format="YYYY-MM-DD"
-                clearable
-                :disabled="isTaskPending(task.id)"
-                :aria-label="`${task.title} 시작일`"
-                placeholder="날짜 선택"
-                @change="updateDates(task, 'startDate', $event)"
-              />
-            </div>
-            <div role="cell">
-              <el-date-picker
-                :model-value="task.endDate"
-                type="date"
-                value-format="YYYY-MM-DD"
-                format="YYYY-MM-DD"
-                clearable
-                :disabled="isTaskPending(task.id)"
-                :aria-label="`${task.title} 종료일`"
-                placeholder="날짜 선택"
-                @change="updateDates(task, 'endDate', $event)"
-              />
-            </div>
-          </div>
 
-          <button class="add-item-button" type="button" @click="openCreate(group.column.id)">
-            <span aria-hidden="true">＋</span> Add item
-          </button>
+            <button class="add-item-button" type="button" @click="openCreate(group.column.id)">
+              <span aria-hidden="true">＋</span> Add item
+            </button>
+          </div>
         </section>
 
         <div v-if="groups.length === 0" class="items-state">
@@ -377,6 +402,25 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
   border-bottom: 1px solid #d0d7de;
   background: #fff;
 }
+
+.items-group__toggle {
+  width: 28px;
+  height: 32px;
+  padding: 0;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #57606a;
+  cursor: pointer;
+  font-size: 22px;
+}
+
+.items-group__toggle:hover { background: #f6f8fa; color: #1f2328; }
+.items-group__toggle span { display: block; line-height: 1; transition: transform .12s; }
+.items-group__toggle .items-group__chevron--collapsed { transform: rotate(-90deg); }
 
 .items-group__header h3 {
   margin: 0;
