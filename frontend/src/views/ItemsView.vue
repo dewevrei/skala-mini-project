@@ -404,8 +404,8 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 }
 
 .items-group__toggle {
-  width: 28px;
-  height: 32px;
+  width: 24px;
+  height: 28px;
   padding: 0;
   display: grid;
   flex: 0 0 auto;
@@ -415,7 +415,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
   background: transparent;
   color: #57606a;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 16px;
 }
 
 .items-group__toggle:hover { background: #f6f8fa; color: #1f2328; }
