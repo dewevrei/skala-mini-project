@@ -348,8 +348,11 @@ function applyAffectedGroups(affected) {
 .board-card__topline strong { overflow-wrap: anywhere; font-size: 16px; line-height: 1.35; }
 .priority-badge { flex: none; padding: 2px 7px; border: 1px solid #d0d7de; border-radius: 999px; color: #57606a; background: #f6f8fa; font-size: 12px; font-weight: 650; }
 .board-card__description { display: -webkit-box; overflow: hidden; color: #57606a; line-height: 1.45; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
-.add-item-button { width: 100%; min-height: 40px; border: 0; border-radius: 7px; background: transparent; color: #57606a; cursor: pointer; text-align: left; font-size: 15px; }
+.add-item-button { width: 100%; min-height: 40px; border: 0; border-radius: 7px; background: transparent; color: #57606a; cursor: pointer; opacity: 0; pointer-events: none; text-align: left; transition: opacity .12s; font-size: 15px; }
+.board-column:hover .add-item-button,
+.board-column:focus-within .add-item-button { opacity: 1; pointer-events: auto; }
 .add-item-button:hover { background: #eaeef2; color: #1f2328; }
 .new-column-button { width: 164px; min-height: 46px; align-self: flex-start; flex: none; padding: 0 16px; border: 1px solid #d0d7de; border-radius: 8px; background: #f6f8fa; color: #1f2328; cursor: pointer; font-weight: 600; text-align: left; }
 .new-column-button:hover { background: #eaeef2; }
+@media (hover: none) { .add-item-button { opacity: 1; pointer-events: auto; } }
 </style>
