@@ -111,7 +111,7 @@ public class TaskService {
         List<BoardColumn> columns = orderedColumns(projectId);
         List<Task> tasks = query == null || query.isEmpty()
                 ? taskRepository.findAllForItems(projectId)
-                : taskRepository.searchAllForItems(projectId, query);
+                : taskRepository.searchAllForItems(projectId, escapeLikePattern(query));
         return new BoardData(ProjectResponse.from(project), groups(columns, tasks, true));
     }
 
@@ -211,6 +211,10 @@ public class TaskService {
         } catch (DateTimeParseException exception) {
             throw new DomainException(ApiCode.INVALID_TASK_DATE, exception);
         }
+    }
+
+    private String escapeLikePattern(String value) {
+        return value.replace("!", "!!").replace("%", "!%").replace("_", "!_");
     }
 
     private void validateContentEnvelope(TaskContentRequest request) {

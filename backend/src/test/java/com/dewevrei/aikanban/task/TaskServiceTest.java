@@ -193,6 +193,22 @@ class TaskServiceTest {
     }
 
     @Test
+    void Items_검색은_LIKE의_percent_underscore_escape문자를_literal로_escape한다() {
+        when(projects.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(project));
+        when(columns.findAllByProjectIdOrderBySortOrderAscIdAsc(10L)).thenReturn(List.of());
+
+        service.items(1L, 10L, "%");
+        service.items(1L, 10L, "_");
+        service.items(1L, 10L, "!");
+        service.items(1L, 10L, "100%_!");
+
+        verify(tasks).searchAllForItems(10L, "!%");
+        verify(tasks).searchAllForItems(10L, "!_");
+        verify(tasks).searchAllForItems(10L, "!!");
+        verify(tasks).searchAllForItems(10L, "100!%!_!!");
+    }
+
+    @Test
     void 같은_열에서_before_Task_바로_앞으로_이동하고_한_group만_반환한다() {
         Task one = task(1L, 100L, 1L, "one");
         Task two = task(2L, 100L, 2L, "two");
