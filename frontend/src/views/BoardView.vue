@@ -238,6 +238,18 @@ function allowDrop(event, kind) {
   }
 }
 
+function allowColumnContentsDrop(event) {
+  if ((dragging.kind === 'task' || dragging.kind === 'column') && !movePending.value) {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+  }
+}
+
+function dropOnColumn(targetColumnId) {
+  if (dragging.kind === 'task') return dropTask(targetColumnId, null)
+  if (dragging.kind === 'column') return dropColumnBefore(targetColumnId)
+}
+
 function clearDrag() {
   dragging.kind = ''
   dragging.id = null
@@ -265,8 +277,8 @@ function clearDrag() {
           <article
             class="board-column"
             :class="{ 'board-column--drag-source': dragging.kind === 'task' && String(dragging.columnId) === String(group.column.id) }"
-            @dragover="allowDrop($event, 'column')"
-            @drop="dropColumnBefore(group.column.id)"
+            @dragover="allowColumnContentsDrop($event)"
+            @drop="dropOnColumn(group.column.id)"
           >
             <header class="board-column__header">
               <span class="board-column__marker" />
