@@ -235,11 +235,6 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
             >
               <span :class="{ 'items-group__chevron--collapsed': isColumnCollapsed(group.column.id) }" aria-hidden="true">∨</span>
             </button>
-            <span
-              class="status-marker"
-              :class="`status-marker--${groupIndex % 6}`"
-              aria-hidden="true"
-            />
             <h3 :id="`items-group-${group.column.id}`">{{ group.column.name }}</h3>
             <span class="task-count" :aria-label="`${group.tasks.length}개 Task`">{{ group.tasks.length }}</span>
           </header>
@@ -457,22 +452,6 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
   font-size: 19px;
   font-weight: 500;
 }
-
-.status-marker {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  border: 3px solid #57606a;
-  border-radius: 50%;
-  background: #fff;
-}
-
-.status-marker--0 { border-color: #3f7f46; background: #dafbe1; }
-.status-marker--1 { border-color: #9a6700; background: #fff8c5; }
-.status-marker--2 { border-color: #bc4c00; background: #fff1e5; }
-.status-marker--3 { border-color: #0969da; background: #ddf4ff; }
-.status-marker--4 { border-color: #8250df; background: #fbefff; }
-.status-marker--5 { border-color: #57606a; background: #f6f8fa; }
 
 .task-count {
   min-width: 28px;

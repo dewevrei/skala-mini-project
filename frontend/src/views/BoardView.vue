@@ -230,7 +230,6 @@ function applyAffectedGroups(affected) {
       >
         <article v-for="group in groups" :key="group.column.id" class="board-column">
             <header class="board-column__header">
-              <span class="board-column__marker" />
               <h2>{{ group.column.name }}</h2>
               <span class="board-column__count" :aria-label="`${group.tasks.length}개 Task`">{{ group.tasks.length }}</span>
               <el-dropdown trigger="click">
@@ -333,7 +332,6 @@ function applyAffectedGroups(affected) {
 .column-sort-ghost { border-color: #7dd3fc; background: #f0f9ff; box-shadow: 0 0 0 1px #7dd3fc; opacity: .35; }
 .column-drag-preview { width: 344px; border: 1px solid #7dd3fc; border-radius: 10px; background: #f6f8fa; box-shadow: 0 8px 20px rgba(31, 35, 40, .18); }
 .board-column__header { min-height: 62px; padding: 14px 12px 12px 16px; display: flex; align-items: center; gap: 9px; }
-.board-column__marker { width: 20px; height: 20px; border: 3px solid #43853d; border-radius: 50%; background: #dafbe1; }
 .board-column__header h2 { flex: 1; min-width: 0; margin: 0; overflow: hidden; color: #24292f; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; font-weight: 500; }
 .board-column__count { min-width: 27px; padding: 2px 8px; border-radius: 999px; background: #eaeef2; color: #57606a; text-align: center; font-size: 13px; }
 .icon-button { min-width: 30px; min-height: 30px; padding: 2px; border: 0; border-radius: 6px; background: transparent; color: #57606a; cursor: pointer; font-size: 20px; }
