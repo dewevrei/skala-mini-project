@@ -395,7 +395,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 
 .items-group__header {
   min-height: 70px;
-  padding: 0 38px;
+  padding: 0 38px 0 32px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -416,6 +416,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
   color: #57606a;
   cursor: pointer;
   font-size: 16px;
+  margin-right: 8px;
 }
 
 .items-group__toggle:hover { background: #f6f8fa; color: #1f2328; }
