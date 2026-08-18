@@ -31,3 +31,115 @@ select {
 .placeholder-page {
   padding: 32px;
 }
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #f6f8fa;
+}
+
+.auth-card {
+  width: 420px;
+  padding: 36px;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(140, 149, 159, 0.18);
+  text-align: center;
+}
+
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: #1f6f43;
+  color: #fff;
+  font-weight: 700;
+}
+
+.auth-card h1 {
+  margin: 18px 0 8px;
+  font-size: 28px;
+}
+
+.auth-card p {
+  margin: 0 0 24px;
+  color: #57606a;
+  line-height: 1.55;
+}
+
+.auth-card .el-alert {
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.google-login {
+  width: 100%;
+  background: #1f6f43;
+  border-color: #1f6f43;
+}
+
+.profile-page {
+  min-height: 100vh;
+  background: #f6f8fa;
+}
+
+.profile-header {
+  height: 64px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #d0d7de;
+  background: #fff;
+}
+
+.wordmark {
+  border: 0;
+  background: transparent;
+  color: #1f2328;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-content {
+  width: 760px;
+  margin: 36px auto;
+}
+
+.profile-panel {
+  border: 1px solid #d0d7de;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.profile-panel__heading {
+  padding: 24px 28px;
+  border-bottom: 1px solid #d8dee4;
+}
+
+.profile-panel__heading h1 {
+  margin: 0 0 6px;
+  font-size: 24px;
+}
+
+.profile-panel__heading p {
+  margin: 0;
+  color: #57606a;
+}
+
+.profile-panel .el-form {
+  padding: 28px;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+}
