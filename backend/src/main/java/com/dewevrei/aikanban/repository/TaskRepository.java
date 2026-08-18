@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import com.dewevrei.aikanban.domain.Task;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
+    long countByColumnId(Long columnId);
+
     List<Task> findAllByProjectIdAndColumnIdOrderBySortOrderAscIdAsc(Long projectId, Long columnId);
 
     @Query("""
