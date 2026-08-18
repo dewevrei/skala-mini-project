@@ -457,10 +457,12 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 }
 
 .items-row {
-  min-height: 72px;
+  min-height: 56px;
   border-bottom: 1px solid #d8dee4;
   background: #fff;
 }
+
+.items-row > div { padding: 8px 20px; }
 
 .items-row:hover {
   background: #f6f8fa;
