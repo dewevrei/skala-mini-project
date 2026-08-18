@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: ai-kanban
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/ai_kanban?connectionTimeZone=Asia/Seoul&forceConnectionTimeZoneToSession=true&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      username: ${REDIS_USERNAME:}
+      password: ${REDIS_PASSWORD:}
+  session:
+    timeout: 24h
+    redis:
+      namespace: ai-kanban:session
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:local-placeholder}
+            client-secret: ${GOOGLE_CLIENT_SECRET:local-placeholder}
+            scope: openid,profile,email
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY:local-placeholder}
+        chat:
+          model: gemini-2.5-flash
+          temperature: 0.2
+          top-p: 0.9
+          max-output-tokens: 8192
+
+server:
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        name: SESSION
+        http-only: true
+        secure: false
+        same-site: lax
+        path: /
+        max-age: 7d
+
+app:
+  frontend-origin: http://localhost:5173
+  frontend-url: http://localhost:5173
+  timezone: Asia/Seoul
