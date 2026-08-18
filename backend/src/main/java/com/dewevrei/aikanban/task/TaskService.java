@@ -70,6 +70,18 @@ public class TaskService {
     }
 
     @Transactional
+    public TaskResponse updatePriority(long userId, long projectId, long taskId, TaskPriorityRequest request) {
+        if (request == null || request.hasUnknownField() || request.priority() == null
+                || request.priority() < 1 || request.priority() > 5) {
+            throw new DomainException(ApiCode.INVALID_TASK_PRIORITY);
+        }
+        ownedProject(userId, projectId);
+        Task task = ownedTask(userId, projectId, taskId);
+        task.updatePriority(request.priority());
+        return TaskResponse.from(taskRepository.saveAndFlush(task));
+    }
+
+    @Transactional
     public TaskResponse updateDates(long userId, long projectId, long taskId, TaskDatesRequest request) {
         if (request == null || request.hasUnknownField() || !request.hasBothKeys()) {
             throw new DomainException(ApiCode.INVALID_TASK_DATE);

@@ -74,6 +74,14 @@ public class TaskController {
         return ok(ApiCode.TASK_UPDATED, service.update(user.userId(), projectId, taskId, request));
     }
 
+    @PatchMapping("/tasks/{taskId}/priority")
+    public ResponseEntity<ApiResponse<TaskData>> updatePriority(
+            @AuthenticationPrincipal AuthenticatedUser user, @PathVariable long projectId,
+            @PathVariable long taskId, @RequestBody TaskPriorityRequest request) {
+        return ok(ApiCode.TASK_UPDATED,
+                service.updatePriority(user.userId(), projectId, taskId, request));
+    }
+
     @PatchMapping("/tasks/{taskId}/dates")
     public ResponseEntity<ApiResponse<TaskData>> updateDates(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @PathVariable long taskId,

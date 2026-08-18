@@ -108,6 +108,22 @@ class TaskServiceTest {
     }
 
     @Test
+    void 우선순위는_1부터_5까지_변경하며_그_외_입력은_거부한다() {
+        Task target = task(1L, 100L, 1L, "task");
+        when(projects.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(project));
+        when(tasks.findOwned(1L, 10L, 1L)).thenReturn(Optional.of(target));
+        when(tasks.saveAndFlush(target)).thenReturn(target);
+
+        TaskResponse result = service.updatePriority(1L, 10L, 1L, new TaskPriorityRequest(5));
+
+        assertThat(result.priority()).isEqualTo(5);
+        assertCode(ApiCode.INVALID_TASK_PRIORITY,
+                () -> service.updatePriority(1L, 10L, 1L, new TaskPriorityRequest(0)));
+        assertCode(ApiCode.INVALID_TASK_PRIORITY,
+                () -> service.updatePriority(1L, 10L, 1L, new TaskPriorityRequest(null)));
+    }
+
+    @Test
     void 타인이나_다른_Project의_Task는_TASK_NOT_FOUND로_숨긴다() {
         when(projects.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(project));
         when(tasks.findOwned(1L, 10L, 1L)).thenReturn(Optional.empty());

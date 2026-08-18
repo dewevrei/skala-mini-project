@@ -90,6 +90,10 @@ public class Task extends BaseTimeEntity {
         this.endDate = endDate;
     }
 
+    public void updatePriority(int priority) {
+        this.priority = priority;
+    }
+
     public void moveTo(Long projectId, Long columnId, long sortOrder) {
         this.projectId = projectId;
         this.columnId = columnId;

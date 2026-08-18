@@ -28,6 +28,7 @@ let requestSequence = 0
 const projectId = computed(() => route.params.projectId)
 const hasTasks = computed(() => groups.value.some((group) => group.tasks.length > 0))
 const statusOptions = computed(() => groups.value.map((group) => group.column))
+const priorityOptions = [1, 2, 3, 4, 5]
 
 function setTaskPending(taskId, pending) {
   const next = new Set(pendingTasks.value)
@@ -109,6 +110,21 @@ async function changeStatus(task, targetColumnId) {
   try {
     const response = await taskApi.changeStatus(projectId.value, task.id, targetColumnId)
     applyCanonicalGroups(response.data.affectedColumnGroups ?? [])
+    ElMessage.success(response.message)
+  } catch (error) {
+    ElMessage.error(error.message)
+    await refreshItems({ quiet: true })
+  } finally {
+    setTaskPending(task.id, false)
+  }
+}
+
+async function updatePriority(task, priority) {
+  if (Number(priority) === task.priority || isTaskPending(task.id)) return
+  setTaskPending(task.id, true)
+  try {
+    const response = await taskApi.updatePriority(projectId.value, task.id, Number(priority))
+    replaceTask(response.data.task)
     ElMessage.success(response.message)
   } catch (error) {
     ElMessage.error(error.message)
@@ -256,8 +272,20 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
                   />
                 </el-select>
               </div>
-              <div class="priority-cell" role="cell" :aria-label="`우선순위 ${task.priority}`">
-                {{ task.priority }}
+              <div class="priority-cell" role="cell">
+                <el-select
+                  :model-value="task.priority"
+                  :disabled="isTaskPending(task.id)"
+                  :aria-label="`${task.title} 우선순위`"
+                  @change="updatePriority(task, $event)"
+                >
+                  <el-option
+                    v-for="priority in priorityOptions"
+                    :key="priority"
+                    :label="`P${priority}`"
+                    :value="priority"
+                  />
+                </el-select>
               </div>
               <div role="cell">
                 <el-date-picker

@@ -14,6 +14,10 @@ export const taskApi = {
     `/projects/${projectId}/tasks/${taskId}`,
     payload,
   ),
+  updatePriority: (projectId, taskId, priority) => apiEnvelopeClient.patch(
+    `/projects/${projectId}/tasks/${taskId}/priority`,
+    { priority },
+  ),
   remove: (projectId, taskId) => apiEnvelopeClient.delete(`/projects/${projectId}/tasks/${taskId}`),
   updateDates: (projectId, taskId, payload) => apiEnvelopeClient.patch(
     `/projects/${projectId}/tasks/${taskId}/dates`,
