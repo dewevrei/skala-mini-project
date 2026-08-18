@@ -53,6 +53,11 @@ function toggleColumn(columnId) {
   collapsedColumnIds.value = next
 }
 
+function statusTone(columnId) {
+  const index = statusOptions.value.findIndex((column) => String(column.id) === String(columnId))
+  return `status-cell--${index >= 0 ? index % 6 : 5}`
+}
+
 async function refreshItems({ quiet = false } = {}) {
   const sequence = ++requestSequence
   if (!quiet) loading.value = true
@@ -219,7 +224,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 
       <template v-else>
         <section
-          v-for="(group, groupIndex) in groups"
+          v-for="group in groups"
           :key="group.column.id"
           class="items-group"
           :aria-labelledby="`items-group-${group.column.id}`"
@@ -252,7 +257,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
                   {{ task.title }}
                 </button>
               </div>
-              <div role="cell">
+              <div class="status-cell" :class="statusTone(task.columnId)" role="cell">
                 <el-select
                   :model-value="task.columnId"
                   :disabled="isTaskPending(task.id)"
@@ -282,7 +287,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
                   />
                 </el-select>
               </div>
-              <div role="cell">
+              <div class="date-cell" role="cell">
                 <el-date-picker
                   :model-value="task.startDate"
                   type="date"
@@ -295,7 +300,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
                   @change="updateDates(task, 'startDate', $event)"
                 />
               </div>
-              <div role="cell">
+              <div class="date-cell" role="cell">
                 <el-date-picker
                   :model-value="task.endDate"
                   type="date"
@@ -478,6 +483,52 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
 .items-row :deep(.el-select),
 .items-row :deep(.el-date-editor) {
   width: 100%;
+}
+
+/* 셀 자체가 편집 영역처럼 보이도록 Element Plus 입력 외곽선을 제거한다. */
+.items-row :deep(.el-select__wrapper),
+.items-row :deep(.el-input__wrapper) {
+  min-height: 30px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none !important;
+}
+
+.items-row :deep(.el-select__wrapper.is-focused),
+.items-row :deep(.el-input__wrapper.is-focus) {
+  box-shadow: none !important;
+}
+
+.items-row :deep(.el-input__inner) {
+  color: #57606a;
+  font-size: 14px;
+}
+
+.items-row :deep(.el-input__prefix),
+.items-row :deep(.el-input__suffix) {
+  color: #57606a;
+}
+
+.status-cell :deep(.el-select__selected-item) {
+  width: fit-content;
+  padding: 2px 9px;
+  border: 1px solid #b7dfba;
+  border-radius: 999px;
+  background: #dafbe1;
+  color: #2f7d32;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.status-cell--1 :deep(.el-select__selected-item) { border-color: #e7c95f; background: #fff8c5; color: #9a6700; }
+.status-cell--2 :deep(.el-select__selected-item) { border-color: #f0b78d; background: #fff1e5; color: #bc4c00; }
+.status-cell--3 :deep(.el-select__selected-item) { border-color: #a9d6ff; background: #ddf4ff; color: #0969da; }
+.status-cell--4 :deep(.el-select__selected-item) { border-color: #d8b4fe; background: #fbefff; color: #8250df; }
+.status-cell--5 :deep(.el-select__selected-item) { border-color: #d0d7de; background: #f6f8fa; color: #57606a; }
+
+.date-cell :deep(.el-input__inner) {
+  cursor: pointer;
 }
 
 .task-title-button {
