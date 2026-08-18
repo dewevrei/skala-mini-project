@@ -29,6 +29,12 @@ class UserInputValidatorTest {
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> UserInputValidator.normalize("hello\nworld"))
                 .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> UserInputValidator.normalize("\nhello"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> UserInputValidator.normalize("hello\t"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> UserInputValidator.normalize("\r hello \r"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

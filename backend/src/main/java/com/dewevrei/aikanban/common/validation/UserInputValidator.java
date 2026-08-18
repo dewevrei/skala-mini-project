@@ -49,11 +49,10 @@ public final class UserInputValidator {
         if (value == null) {
             return null;
         }
-        String stripped = value.strip();
-        if (stripped.codePoints().anyMatch(UserInputValidator::isForbiddenControl)) {
+        if (value.codePoints().anyMatch(UserInputValidator::isForbiddenControl)) {
             throw new IllegalArgumentException("제어 문자는 입력할 수 없습니다.");
         }
-        return stripped;
+        return value.strip();
     }
 
     public static boolean exceeds(String value, int maxCodePoints) {

@@ -32,8 +32,10 @@ public class Task extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumns({
-            @JoinColumn(name = "project_id", referencedColumnName = "project_id", insertable = false, updatable = false),
-            @JoinColumn(name = "column_id", referencedColumnName = "id", insertable = false, updatable = false)
+            @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false,
+                    insertable = false, updatable = false),
+            @JoinColumn(name = "column_id", referencedColumnName = "id", nullable = false,
+                    insertable = false, updatable = false)
     })
     private BoardColumn column;
 
