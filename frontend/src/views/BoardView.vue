@@ -250,6 +250,15 @@ function dropOnColumn(targetColumnId) {
   if (dragging.kind === 'column') return dropColumnBefore(targetColumnId)
 }
 
+function dropAtBoardEnd() {
+  if (dragging.kind === 'task') {
+    const lastColumnId = groups.value.at(-1)?.column.id
+    if (lastColumnId !== undefined) return dropTask(lastColumnId, null)
+    return
+  }
+  if (dragging.kind === 'column') return dropColumnAtEnd()
+}
+
 function clearDrag() {
   dragging.kind = ''
   dragging.id = null
@@ -271,8 +280,8 @@ function clearDrag() {
           <div
             class="column-drop-zone"
             aria-hidden="true"
-            @dragover="allowDrop($event, 'column')"
-            @drop="dropColumnBefore(group.column.id)"
+            @dragover="allowColumnContentsDrop($event)"
+            @drop="dropOnColumn(group.column.id)"
           />
           <article
             class="board-column"
@@ -331,8 +340,14 @@ function clearDrag() {
             </div>
           </article>
         </template>
-        <div class="column-drop-zone" aria-hidden="true" @dragover="allowDrop($event, 'column')" @drop="dropColumnAtEnd" />
-        <button type="button" class="new-column-button" @click="openColumnCreate">＋ New column</button>
+        <div class="column-drop-zone" aria-hidden="true" @dragover="allowColumnContentsDrop($event)" @drop="dropAtBoardEnd" />
+        <button
+          type="button"
+          class="new-column-button"
+          @click="openColumnCreate"
+          @dragover="allowColumnContentsDrop($event)"
+          @drop="dropAtBoardEnd"
+        >＋ New column</button>
       </div>
     </div>
 
