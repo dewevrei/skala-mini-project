@@ -234,16 +234,10 @@ select {
   align-items: start;
   gap: 16px;
   border-bottom: 1px solid #d8dee4;
-  cursor: pointer;
 }
 
 .project-row:last-child {
   border-bottom: 0;
-}
-
-.project-row:hover,
-.project-row:focus-visible {
-  background: #f6f8fa;
 }
 
 .project-row__icon {
@@ -254,6 +248,27 @@ select {
 .project-row__content h2 {
   margin: 0 0 10px;
   font-size: 21px;
+}
+
+.project-row__title-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1f2328;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.project-row__title-link:hover {
+  color: #0969da;
+  text-decoration: underline;
+}
+
+.project-row__title-link:focus-visible {
+  outline: 2px solid #0969da;
+  outline-offset: 3px;
+  border-radius: 3px;
 }
 
 .project-row__content p {

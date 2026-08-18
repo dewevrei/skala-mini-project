@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import AppShell from '../components/AppShell.vue'
 import ProjectFormModal from '../components/ProjectFormModal.vue'
 import { useProjectStore } from '../stores/projects'
@@ -10,7 +10,6 @@ const projects = useProjectStore()
 const router = useRouter()
 const modalOpen = ref(false)
 const editingProject = ref(null)
-const deletingId = ref(null)
 
 onMounted(load)
 
@@ -30,23 +29,6 @@ function createProject() {
 function editProject(project) {
   editingProject.value = project
   modalOpen.value = true
-}
-
-async function deleteProject(project) {
-  try {
-    await ElMessageBox.confirm(
-      `“${project.name}” 프로젝트와 모든 Column 및 Task가 완전히 삭제됩니다. 이 작업은 되돌릴 수 없습니다.`,
-      '프로젝트 삭제',
-      { confirmButtonText: '완전히 삭제', cancelButtonText: '취소', type: 'warning' },
-    )
-    deletingId.value = project.id
-    const response = await projects.deleteProject(project.id)
-    ElMessage.success(response.message)
-  } catch (error) {
-    if (error !== 'cancel' && error !== 'close') ElMessage.error(error.message)
-  } finally {
-    deletingId.value = null
-  }
 }
 </script>
 
@@ -71,27 +53,18 @@ async function deleteProject(project) {
           v-for="project in projects.projects"
           :key="project.id"
           class="project-row"
-          tabindex="0"
-          @click="router.push(`/projects/${project.id}/board`)"
-          @keydown.enter="router.push(`/projects/${project.id}/board`)"
         >
           <div class="project-row__icon" aria-hidden="true">▦</div>
           <div class="project-row__content">
-            <h2>{{ project.name }}</h2>
+            <h2>
+              <button class="project-row__title-link" type="button" @click="router.push(`/projects/${project.id}/board`)">
+                {{ project.name }}
+              </button>
+            </h2>
             <p v-if="project.description">{{ project.description }}</p>
             <p v-else class="project-row__muted">설명이 없습니다.</p>
           </div>
-          <el-dropdown trigger="click" @click.stop>
-            <el-button text circle aria-label="프로젝트 메뉴">•••</el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="editProject(project)">수정</el-dropdown-item>
-                <el-dropdown-item divided class="danger-menu-item" :disabled="deletingId === project.id" @click="deleteProject(project)">
-                  삭제
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          <el-button text circle aria-label="프로젝트 수정" @click="editProject(project)">•••</el-button>
         </article>
       </section>
     </main>
