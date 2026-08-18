@@ -208,6 +208,10 @@ function startTaskDrag(event, task) {
 
 async function dropTask(targetColumnId, beforeTaskId = null) {
   if (dragging.kind !== 'task' || movePending.value || String(dragging.id) === String(beforeTaskId)) return
+  if (String(dragging.columnId) === String(targetColumnId)) {
+    clearDrag()
+    return
+  }
   movePending.value = true
   try {
     const response = await taskApi.move(projectId.value, dragging.id, { targetColumnId, beforeTaskId })
