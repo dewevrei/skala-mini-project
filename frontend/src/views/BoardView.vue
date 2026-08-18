@@ -167,7 +167,10 @@ async function persistColumnOrder(event) {
 }
 
 async function persistTaskMove(event) {
-  if (movePending.value || event.from === event.to) return
+  if (movePending.value) return
+  // Sortable emits an end event even when a card is released in its original slot.
+  // Only persist when its position or its Column actually changed.
+  if (event.from === event.to && event.oldIndex === event.newIndex) return
   await nextTick()
   const taskId = event.item?.dataset.taskId
   const targetColumnId = event.to?.dataset.columnId
@@ -252,7 +255,6 @@ function applyAffectedGroups(affected) {
               :data-column-id="group.column.id"
               group="board-tasks"
               draggable=".board-card"
-              :sort="false"
               :animation="150"
               :force-fallback="true"
               :fallback-on-body="true"
