@@ -258,6 +258,13 @@ function allowColumnContentsDrop(event, targetColumnId = null) {
   }
 }
 
+function allowBoardDrop(event) {
+  if ((dragging.kind === 'task' || dragging.kind === 'column') && !movePending.value) {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+  }
+}
+
 function dropOnColumn(targetColumnId) {
   if (dragging.kind === 'task') return dropTask(targetColumnId, null)
   if (dragging.kind === 'column') return dropColumnBefore(targetColumnId)
@@ -281,7 +288,12 @@ function clearDrag() {
 </script>
 
 <template>
-  <section class="board-page" aria-label="프로젝트 Board">
+  <section
+    class="board-page"
+    aria-label="프로젝트 Board"
+    @dragover="allowBoardDrop($event)"
+    @drop.prevent="clearDrag"
+  >
     <div v-if="loading" class="board-state" aria-live="polite">
       <el-skeleton :rows="7" animated />
     </div>
