@@ -265,13 +265,23 @@ function clearDrag() {
           <article
             class="board-column"
             :class="{ 'board-column--drag-source': dragging.kind === 'task' && String(dragging.columnId) === String(group.column.id) }"
+            @dragover="allowDrop($event, 'column')"
+            @drop="dropColumnBefore(group.column.id)"
           >
             <header class="board-column__header">
               <span class="board-column__marker" />
               <h2>{{ group.column.name }}</h2>
               <span class="board-column__count" :aria-label="`${group.tasks.length}개 Task`">{{ group.tasks.length }}</span>
               <el-dropdown trigger="click">
-                <button class="icon-button" type="button" :aria-label="`${group.column.name} Column 메뉴`">•••</button>
+                <button
+                  class="icon-button column-menu-handle"
+                  type="button"
+                  :draggable="!movePending"
+                  :aria-label="`${group.column.name} Column 메뉴 또는 순서 이동`"
+                  title="클릭하여 메뉴 열기 · 드래그하여 Column 순서 이동"
+                  @dragstart="startColumnDrag($event, group.column.id)"
+                  @dragend="clearDrag"
+                >•••</button>
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item @click="openColumnEdit(group.column)">Rename</el-dropdown-item>
@@ -280,16 +290,6 @@ function clearDrag() {
                 </template>
               </el-dropdown>
               <button class="icon-button" type="button" aria-label="Task 추가" @click="openTaskCreate(group.column.id)">＋</button>
-              <button
-                class="column-drag-handle"
-                type="button"
-                draggable="true"
-                :disabled="movePending"
-                :aria-label="`${group.column.name} Column 순서 이동`"
-                title="드래그하여 Column 순서 이동"
-                @dragstart="startColumnDrag($event, group.column.id)"
-                @dragend="clearDrag"
-              >⋮⋮</button>
             </header>
             <div
               class="board-column__tasks"
@@ -374,10 +374,10 @@ function clearDrag() {
 .board-column__marker { width: 20px; height: 20px; border: 3px solid #43853d; border-radius: 50%; background: #dafbe1; }
 .board-column__header h2 { flex: 1; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; }
 .board-column__count { min-width: 27px; padding: 2px 8px; border-radius: 999px; background: #eaeef2; color: #57606a; text-align: center; font-size: 13px; }
-.icon-button, .column-drag-handle { min-width: 30px; min-height: 30px; padding: 2px; border: 0; border-radius: 6px; background: transparent; color: #57606a; cursor: pointer; font-size: 20px; }
-.icon-button:hover, .column-drag-handle:hover { background: #eaeef2; color: #1f2328; }
-.column-drag-handle { cursor: grab; font-size: 15px; letter-spacing: -3px; }
-.column-drag-handle:active { cursor: grabbing; }
+.icon-button { min-width: 30px; min-height: 30px; padding: 2px; border: 0; border-radius: 6px; background: transparent; color: #57606a; cursor: pointer; font-size: 20px; }
+.icon-button:hover { background: #eaeef2; color: #1f2328; }
+.column-menu-handle { cursor: grab; }
+.column-menu-handle:active { cursor: grabbing; }
 .board-column__tasks { min-height: 180px; flex: 1; padding: 0 12px 12px; border-radius: 0 0 10px 10px; }
 .task-drop-zone { height: 8px; border-radius: 4px; transition: background .12s; }
 .task-drop-zone:hover { background: #54aeff; }
