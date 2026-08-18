@@ -301,7 +301,7 @@ function clearDrag() {
       <template #extra><el-button type="primary" @click="fetchBoard()">다시 시도</el-button></template>
     </el-result>
     <div v-else class="board-scroll" @drop.self="dropAtBoardEnd">
-      <div class="board-columns">
+      <div class="board-columns" @drop.self="dropAtBoardEnd">
         <template v-for="group in groups" :key="group.column.id">
           <div
             class="column-drop-zone"
