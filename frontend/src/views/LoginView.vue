@@ -20,7 +20,6 @@ const errorMessage = computed(() => {
     <section class="auth-card" aria-labelledby="login-title">
       <div class="brand-mark" aria-hidden="true">AI</div>
       <h1 id="login-title">AI Kanban</h1>
-      <p>Google 계정으로 로그인해 프로젝트와 작업을 관리하세요.</p>
       <el-alert v-if="errorMessage" :title="errorMessage" type="error" :closable="false" show-icon />
       <el-button class="google-login" type="primary" size="large" tag="a" :href="backendLoginUrl">
         Google로 계속하기
