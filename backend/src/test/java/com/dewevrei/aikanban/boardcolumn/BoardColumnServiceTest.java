@@ -28,6 +28,7 @@ import com.dewevrei.aikanban.domain.User;
 import com.dewevrei.aikanban.repository.BoardColumnRepository;
 import com.dewevrei.aikanban.repository.ProjectRepository;
 import com.dewevrei.aikanban.repository.TaskRepository;
+import com.dewevrei.aikanban.task.ColumnTaskCount;
 
 @ExtendWith(MockitoExtension.class)
 class BoardColumnServiceTest {
@@ -63,13 +64,17 @@ class BoardColumnServiceTest {
         BoardColumn done = column(101L, "Done", 2);
         when(projects.findWithLockByIdAndUserId(10L, 1L)).thenReturn(Optional.of(project));
         when(columns.findAllByProjectIdOrderBySortOrderAscIdAsc(10L)).thenReturn(List.of(todo, done));
+        when(tasks.countAllByColumnId(10L)).thenReturn(List.of(new ColumnTaskCount(100L, 3L)));
 
         List<ColumnResponse> result = service.reorder(1L, 10L,
                 new ReorderColumnsRequest(List.of(101L, 100L)));
 
         assertThat(result).extracting(ColumnResponse::id).containsExactly(101L, 100L);
         assertThat(result).extracting(ColumnResponse::sortOrder).containsExactly(1, 2);
+        assertThat(result).extracting(ColumnResponse::taskCount).containsExactly(0L, 3L);
         assertThat(done.getSortOrder()).isEqualTo(1);
+        verify(tasks).countAllByColumnId(10L);
+        verify(tasks, never()).countByColumnId(any());
     }
 
     @Test

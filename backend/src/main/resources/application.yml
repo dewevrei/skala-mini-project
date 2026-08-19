@@ -64,3 +64,6 @@ app:
   frontend-origin: http://localhost:5173
   frontend-url: http://localhost:5173
   timezone: Asia/Seoul
+  ai:
+    gemini:
+      timeout: 30s

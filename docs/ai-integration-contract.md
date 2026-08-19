@@ -9,7 +9,7 @@ Client: Spring AI `ChatClient`
 - Spring AI 2.0.x BOM을 사용한다.
 - Google GenAI starter를 사용한다.
 - 인증은 Google AI Studio에서 발급한 API key다.
-- 기본 모델은 `gemini-2.5-flash`다.
+- 기본 모델은 `gemini-3.5-flash`다.
 - 모델 ID는 실행 환경 설정으로 교체할 수 있다.
 - API key는 실행 환경에서 주입하고 소스·Git·응답·일반 로그에 넣지 않는다.
 - streaming을 사용하지 않는 동기 `ChatClient` 호출이다.
@@ -185,7 +185,7 @@ DB Task:
 
 | 항목 | 값 |
 |---|---|
-| 모델 | `gemini-2.5-flash` |
+| 모델 | `gemini-3.5-flash` |
 | 호출당 timeout | 30초 |
 | temperature | `0.2` |
 | topP | `0.9` |

@@ -183,8 +183,9 @@ class TaskServiceTest {
         when(projects.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(project));
         when(columns.findAllByProjectIdOrderBySortOrderAscIdAsc(10L)).thenReturn(List.of(todo, done));
         when(tasks.searchAllForItems(10L, "aLpHa")).thenReturn(List.of(match));
-        when(tasks.countByColumnId(100L)).thenReturn(5L);
-        when(tasks.countByColumnId(101L)).thenReturn(3L);
+        when(tasks.countAllByColumnId(10L)).thenReturn(List.of(
+                new ColumnTaskCount(100L, 5L),
+                new ColumnTaskCount(101L, 3L)));
 
         TaskService.BoardData result = service.items(1L, 10L, "  aLpHa  ");
 

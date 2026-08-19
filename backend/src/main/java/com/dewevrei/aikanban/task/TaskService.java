@@ -115,7 +115,7 @@ public class TaskService {
         Project project = ownedProject(userId, projectId);
         List<BoardColumn> columns = orderedColumns(projectId);
         List<Task> tasks = taskRepository.findAllForItems(projectId);
-        return new BoardData(ProjectResponse.from(project), groups(columns, tasks, false));
+        return new BoardData(ProjectResponse.from(project), groups(columns, tasks, Map.of()));
     }
 
     public BoardData items(long userId, long projectId, String titleQuery) {
@@ -125,7 +125,9 @@ public class TaskService {
         List<Task> tasks = query == null || query.isEmpty()
                 ? taskRepository.findAllForItems(projectId)
                 : taskRepository.searchAllForItems(projectId, escapeLikePattern(query));
-        return new BoardData(ProjectResponse.from(project), groups(columns, tasks, true));
+        Map<Long, Long> taskCounts = taskRepository.countAllByColumnId(projectId).stream()
+                .collect(Collectors.toMap(ColumnTaskCount::columnId, ColumnTaskCount::taskCount));
+        return new BoardData(ProjectResponse.from(project), groups(columns, tasks, taskCounts));
     }
 
     @Transactional
@@ -187,12 +189,12 @@ public class TaskService {
     }
 
     private List<ColumnGroupResponse> groups(List<BoardColumn> columns, List<Task> tasks,
-            boolean countAllTasks) {
+            Map<Long, Long> taskCounts) {
         Map<Long, List<Task>> byColumn = tasks.stream().collect(Collectors.groupingBy(Task::getColumnId,
                 LinkedHashMap::new, Collectors.toList()));
         return columns.stream().map(column -> {
             List<Task> columnTasks = byColumn.getOrDefault(column.getId(), List.of());
-            long taskCount = countAllTasks ? taskRepository.countByColumnId(column.getId()) : columnTasks.size();
+            long taskCount = taskCounts.getOrDefault(column.getId(), (long) columnTasks.size());
             return new ColumnGroupResponse(ColumnResponse.from(column, taskCount),
                     columnTasks.stream().map(TaskResponse::from).toList());
         }).toList();

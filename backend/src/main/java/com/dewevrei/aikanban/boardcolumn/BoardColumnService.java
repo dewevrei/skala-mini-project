@@ -2,7 +2,9 @@ package com.dewevrei.aikanban.boardcolumn;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import com.dewevrei.aikanban.domain.Project;
 import com.dewevrei.aikanban.repository.BoardColumnRepository;
 import com.dewevrei.aikanban.repository.ProjectRepository;
 import com.dewevrei.aikanban.repository.TaskRepository;
+import com.dewevrei.aikanban.task.ColumnTaskCount;
 
 @Service
 @Transactional(readOnly = true)
@@ -79,16 +82,20 @@ public class BoardColumnService {
             throw new DomainException(ErrorCode.INVALID_COLUMN_ORDER);
         }
         Set<Long> requested = new HashSet<>(ids);
-        Set<Long> current = columns.stream().map(BoardColumn::getId).collect(java.util.stream.Collectors.toSet());
+        Set<Long> current = columns.stream().map(BoardColumn::getId).collect(Collectors.toSet());
         if (requested.size() != ids.size() || !requested.equals(current)) {
             throw new DomainException(ErrorCode.INVALID_COLUMN_ORDER);
         }
-        var byId = columns.stream().collect(java.util.stream.Collectors.toMap(BoardColumn::getId, c -> c));
+        var byId = columns.stream().collect(Collectors.toMap(BoardColumn::getId, c -> c));
         for (int index = 0; index < ids.size(); index++) {
             byId.get(ids.get(index)).reorder(index + 1);
         }
         columnRepository.saveAllAndFlush(columns);
-        return ids.stream().map(byId::get).map(this::response).toList();
+        Map<Long, Long> taskCounts = taskRepository.countAllByColumnId(projectId).stream()
+                .collect(Collectors.toMap(ColumnTaskCount::columnId, ColumnTaskCount::taskCount));
+        return ids.stream().map(byId::get)
+                .map(column -> ColumnResponse.from(column, taskCounts.getOrDefault(column.getId(), 0L)))
+                .toList();
     }
 
     @Transactional

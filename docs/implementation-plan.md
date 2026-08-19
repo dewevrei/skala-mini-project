@@ -143,7 +143,7 @@ Gemini 구조화 출력으로 평면 Task 목록을 만들고 확정된 실패 �
 
 ### 작업
 
-- `ChatClient`와 `gemini-2.5-flash` 기본 설정
+- `ChatClient`와 `gemini-3.5-flash` 기본 설정
 - 호출당 timeout 30초, temperature 0.2, topP 0.9, 최대 출력 8,192 tokens
 - Gemini 안전 설정은 별도로 override하지 않음
 - AI 구조 DTO와 schema validation

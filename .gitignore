@@ -1,4 +1,5 @@
 .dryforge
+.DS_Store
 .idea
 .vscode
 backend/.env
@@ -8,4 +9,3 @@ node_modules
 dist
 target
 *.log
-

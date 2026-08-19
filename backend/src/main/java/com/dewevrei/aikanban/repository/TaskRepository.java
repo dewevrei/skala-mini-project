@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.dewevrei.aikanban.domain.Task;
+import com.dewevrei.aikanban.task.ColumnTaskCount;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
     long countByColumnId(Long columnId);
@@ -30,6 +31,14 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             order by c.sortOrder asc, c.id asc, t.sortOrder asc, t.id asc
             """)
     List<Task> searchAllForItems(@Param("projectId") Long projectId, @Param("title") String title);
+
+    @Query("""
+            select new com.dewevrei.aikanban.task.ColumnTaskCount(t.columnId, count(t))
+            from Task t
+            where t.projectId = :projectId
+            group by t.columnId
+            """)
+    List<ColumnTaskCount> countAllByColumnId(@Param("projectId") Long projectId);
 
     @Query("""
             select t from Task t
