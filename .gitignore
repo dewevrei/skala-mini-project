@@ -1,7 +1,7 @@
 .dryforge
 .idea
 .vscode
-.env
+backend/.env
 .env.*
 !.env.example
 node_modules

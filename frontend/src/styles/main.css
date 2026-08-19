@@ -252,7 +252,7 @@ select {
   min-height: 132px;
   padding: 28px 32px;
   display: grid;
-  grid-template-columns: 32px 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: start;
   gap: 16px;
   border-bottom: 1px solid #d8dee4;
@@ -260,11 +260,6 @@ select {
 
 .project-row:last-child {
   border-bottom: 0;
-}
-
-.project-row__icon {
-  padding-top: 2px;
-  font-size: 27px;
 }
 
 .project-row__content h2 {
@@ -311,6 +306,7 @@ select {
 
 .project-list__empty h2 {
   margin: 0 0 8px;
+  font-size: 20px;
 }
 
 .project-list__empty p {
@@ -424,7 +420,34 @@ select {
   margin-left: 0;
 }
 
+.task-cancel-button:hover,
+.task-cancel-button:focus-visible {
+  background: #f6f8fa;
+  border-color: #8c959f;
+  color: #1f2328;
+}
+
+.task-create-button {
+  background: #fff;
+  border-color: #43853d;
+  color: #2f7d32;
+}
+
+.task-create-button:hover,
+.task-create-button:focus-visible {
+  background: #dafbe1;
+  border-color: #2f7d32;
+  color: #1f6f43;
+}
+
 .ai-generate-button {
+  border-color: #8250df;
+  color: #6639ba;
+}
+
+.ai-generate-button:hover,
+.ai-generate-button:focus-visible {
+  background: #f5edff;
   border-color: #8250df;
   color: #6639ba;
 }

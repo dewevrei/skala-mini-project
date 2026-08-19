@@ -105,8 +105,8 @@ function cancelAfterSuccess() {
       </el-form-item>
     </el-form>
     <template #actions>
-      <el-button :disabled="Boolean(pendingAction)" @click="cancel">Cancel</el-button>
-      <el-button type="primary" :loading="pendingAction === 'create'" :disabled="Boolean(pendingAction)" @click="create">
+      <el-button class="task-cancel-button" :disabled="Boolean(pendingAction)" @click="cancel">Cancel</el-button>
+      <el-button class="task-create-button" :loading="pendingAction === 'create'" :disabled="Boolean(pendingAction)" @click="create">
         Create
       </el-button>
       <el-button class="ai-generate-button" :loading="pendingAction === 'generate'" :disabled="Boolean(pendingAction)" @click="generate">

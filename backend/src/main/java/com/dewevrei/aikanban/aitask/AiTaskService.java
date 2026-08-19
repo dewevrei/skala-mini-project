@@ -2,6 +2,8 @@ package com.dewevrei.aikanban.aitask;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
@@ -13,6 +15,8 @@ import com.dewevrei.aikanban.task.TaskResponse;
 
 @Service
 public class AiTaskService {
+    private static final Logger log = LoggerFactory.getLogger(AiTaskService.class);
+
     private final ProjectRepository projects;
     private final AiTaskGenerator generator;
     private final AiTaskPersistence persistence;
@@ -37,10 +41,12 @@ public class AiTaskService {
             try {
                 generated = generator.generate(title, description);
             } catch (InvalidAiResponseException firstInvalid) {
+                log.warn("AI task response validation failed. Retrying once.", firstInvalid);
                 generated = generator.generate(title, description);
             }
             return persistence.saveBatch(userId, projectId, title, generated);
         } catch (InvalidAiResponseException | AiGenerationException aiFailure) {
+            log.warn("AI task generation failed. Saving fallback task.", aiFailure);
             return persistence.saveFallback(userId, projectId, title, description);
         }
     }

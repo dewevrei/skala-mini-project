@@ -2,6 +2,7 @@ package com.dewevrei.aikanban.auth;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.session.web.http.SessionRepositoryFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -37,12 +40,13 @@ public class SecurityConfig {
             GoogleOAuth2UserService oauth2UserService,
             GoogleOidcUserService oidcUserService,
             SessionFailureClassifier sessionFailureClassifier,
+            @Value("${app.frontend-origin}") String frontendOrigin,
             @Value("${app.frontend-url}") String frontendUrl) throws Exception {
         HttpSessionCsrfTokenRepository csrfRepository = new HttpSessionCsrfTokenRepository();
         CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
 
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource(frontendOrigin)))
                 .csrf(csrf -> csrf.csrfTokenRepository(csrfRepository).csrfTokenRequestHandler(csrfHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/oauth2/**", "/login/oauth2/**", "/error").permitAll()
@@ -77,9 +81,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    CorsConfigurationSource corsConfigurationSource(@Value("${app.frontend-origin}") String frontendOrigin) {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(frontendOrigin));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Content-Type", "X-CSRF-TOKEN", "Accept"));
         configuration.setAllowCredentials(true);
@@ -96,6 +100,18 @@ public class SecurityConfig {
         registration.setFilter(new SessionFailureFilter(classifier, frontendUrl));
         registration.setOrder(SessionRepositoryFilter.DEFAULT_ORDER - 1);
         return registration;
+    }
+
+    @Bean
+    CookieSerializer cookieSerializer() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setCookieName("SESSION");
+        serializer.setUseHttpOnlyCookie(true);
+        serializer.setUseSecureCookie(false);
+        serializer.setSameSite("Lax");
+        serializer.setCookiePath("/");
+        serializer.setCookieMaxAge((int) Duration.ofDays(7).getSeconds());
+        return serializer;
     }
 
     private static void writeJson(HttpServletResponse response, int status, String body) throws IOException {

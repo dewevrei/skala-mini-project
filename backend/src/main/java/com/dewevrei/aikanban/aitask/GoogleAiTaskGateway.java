@@ -45,7 +45,7 @@ public final class GoogleAiTaskGateway implements AiTaskGenerator {
 
     static GoogleGenAiChatOptions.Builder options() {
         GoogleGenAiChatOptions.Builder builder = GoogleGenAiChatOptions.builder();
-        builder.model(GoogleGenAiChatModel.ChatModel.GEMINI_2_5_FLASH)
+        builder.model(GoogleGenAiChatModel.ChatModel.GEMINI_3_5_FLASH)
                 .temperature(0.2)
                 .topP(0.9)
                 .maxOutputTokens(8192)

@@ -12,7 +12,7 @@ class GoogleAiTaskGatewayOptionsTest {
     void 공식_GoogleGenAI_options에_확정값만_설정한다() {
         var options = GoogleAiTaskGateway.options().build();
 
-        assertThat(options.getModel()).isEqualTo(GoogleGenAiChatModel.ChatModel.GEMINI_2_5_FLASH.value);
+        assertThat(options.getModel()).isEqualTo(GoogleGenAiChatModel.ChatModel.GEMINI_3_5_FLASH.value);
         assertThat(options.getTemperature()).isEqualTo(0.2);
         assertThat(options.getTopP()).isEqualTo(0.9);
         assertThat(options.getMaxOutputTokens()).isEqualTo(8192);

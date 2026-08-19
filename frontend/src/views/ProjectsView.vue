@@ -44,16 +44,13 @@ function editProject(project) {
 
       <section class="project-list" aria-label="프로젝트 목록" v-loading="projects.loading">
         <div v-if="!projects.loading && projects.projects.length === 0" class="project-list__empty">
-          <h2>아직 프로젝트가 없습니다.</h2>
-          <p>새 프로젝트를 만들면 Todo, In Progress, Done Column이 함께 준비됩니다.</p>
-          <el-button type="primary" @click="createProject">첫 프로젝트 만들기</el-button>
+          <h2>첫 번째 프로젝트를 만들어보세요.</h2>
         </div>
         <article
           v-for="project in projects.projects"
           :key="project.id"
           class="project-row"
         >
-          <div class="project-row__icon" aria-hidden="true">▦</div>
           <div class="project-row__content">
             <h2>
               <button class="project-row__title-link" type="button" @click="router.push(`/projects/${project.id}/board`)">

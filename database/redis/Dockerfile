@@ -13,7 +13,9 @@ EXPOSE 6379
 #   --name ai-kanban-redis `
 #   -e REDIS_PASSWORD='root1234!' `
 #   -p 6379:6379 `
+#   -v ai-kanban-redis-data:/data `
 #   ai-kanban-redis:8.8
 #
 # The password is intentionally supplied at runtime and is not stored in this image.
-CMD ["sh", "-c", "exec redis-server --appendonly no --requirepass \"${REDIS_PASSWORD:?REDIS_PASSWORD must be set}\""]
+# AOF keeps sessions across container restarts; use a volume if the container may be recreated.
+CMD ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"${REDIS_PASSWORD:?REDIS_PASSWORD must be set}\""]

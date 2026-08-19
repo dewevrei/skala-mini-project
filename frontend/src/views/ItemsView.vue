@@ -292,7 +292,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
                   :disabled="isTaskPending(task.id)"
                   :aria-label="`${task.title} 시작일`"
                   placeholder="날짜 선택"
-                  @change="updateDates(task, 'startDate', $event)"
+                  @update:model-value="updateDates(task, 'startDate', $event)"
                 />
               </div>
               <div class="date-cell" role="cell">
@@ -305,7 +305,7 @@ onBeforeUnmount(() => window.clearTimeout(searchTimer))
                   :disabled="isTaskPending(task.id)"
                   :aria-label="`${task.title} 종료일`"
                   placeholder="날짜 선택"
-                  @change="updateDates(task, 'endDate', $event)"
+                  @update:model-value="updateDates(task, 'endDate', $event)"
                 />
               </div>
             </div>
