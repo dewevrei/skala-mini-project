@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dewevrei.aikanban.auth.AuthenticatedUser;
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.SuccessCode;
 import com.dewevrei.aikanban.common.api.ApiResponse;
 
 @RestController
@@ -27,21 +28,21 @@ public class BoardColumnController {
     @PostMapping
     public ResponseEntity<ApiResponse<ColumnData>> create(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @RequestBody ColumnRequest request) {
-        return ResponseEntity.status(ApiCode.COLUMN_CREATED.status()).body(ApiResponse.success(
-                ApiCode.COLUMN_CREATED, new ColumnData(service.create(user.userId(), projectId, request))));
+        return ResponseEntity.status(SuccessCode.COLUMN_CREATED.status()).body(ApiResponse.success(
+                SuccessCode.COLUMN_CREATED, new ColumnData(service.create(user.userId(), projectId, request))));
     }
 
     @PatchMapping("/{columnId}")
     public ResponseEntity<ApiResponse<ColumnData>> update(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @PathVariable long columnId, @RequestBody ColumnRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.COLUMN_UPDATED,
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.COLUMN_UPDATED,
                 new ColumnData(service.update(user.userId(), projectId, columnId, request))));
     }
 
     @PutMapping("/order")
     public ResponseEntity<ApiResponse<ColumnsData>> reorder(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @RequestBody ReorderColumnsRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.COLUMNS_REORDERED,
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.COLUMNS_REORDERED,
                 new ColumnsData(service.reorder(user.userId(), projectId, request))));
     }
 
@@ -49,7 +50,7 @@ public class BoardColumnController {
     public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @PathVariable long columnId) {
         service.delete(user.userId(), projectId, columnId);
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.COLUMN_DELETED, null));
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.COLUMN_DELETED, null));
     }
 
     public record ColumnData(ColumnResponse column) {}

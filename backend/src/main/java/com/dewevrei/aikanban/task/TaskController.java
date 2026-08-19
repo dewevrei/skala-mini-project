@@ -16,6 +16,7 @@ import com.dewevrei.aikanban.auth.AuthenticatedUser;
 import com.dewevrei.aikanban.aitask.AiGenerateRequest;
 import com.dewevrei.aikanban.aitask.AiTaskService;
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.SuccessCode;
 import com.dewevrei.aikanban.common.api.ApiResponse;
 
 @RestController
@@ -33,8 +34,8 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TasksData>> generate(
             @AuthenticationPrincipal AuthenticatedUser user, @PathVariable long projectId,
             @RequestBody AiGenerateRequest request) {
-        return ResponseEntity.status(ApiCode.TASKS_CREATED.status()).body(ApiResponse.success(
-                ApiCode.TASKS_CREATED,
+        return ResponseEntity.status(SuccessCode.TASKS_CREATED.status()).body(ApiResponse.success(
+                SuccessCode.TASKS_CREATED,
                 new TasksData(aiTaskService.generate(user.userId(), projectId, request))));
     }
 
@@ -42,14 +43,14 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskData>> create(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @PathVariable long columnId,
             @RequestBody TaskContentRequest request) {
-        return ResponseEntity.status(ApiCode.TASK_CREATED.status()).body(ApiResponse.success(
-                ApiCode.TASK_CREATED, new TaskData(service.create(user.userId(), projectId, columnId, request))));
+        return ResponseEntity.status(SuccessCode.TASK_CREATED.status()).body(ApiResponse.success(
+                SuccessCode.TASK_CREATED, new TaskData(service.create(user.userId(), projectId, columnId, request))));
     }
 
     @GetMapping("/board")
     public ResponseEntity<ApiResponse<TaskService.BoardData>> board(
             @AuthenticationPrincipal AuthenticatedUser user, @PathVariable long projectId) {
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.BOARD_READ,
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.BOARD_READ,
                 service.board(user.userId(), projectId)));
     }
 
@@ -57,28 +58,28 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskService.BoardData>> items(
             @AuthenticationPrincipal AuthenticatedUser user, @PathVariable long projectId,
             @RequestParam(required = false) String title) {
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.ITEMS_READ,
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.ITEMS_READ,
                 service.items(user.userId(), projectId, title)));
     }
 
     @GetMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskData>> get(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @PathVariable long taskId) {
-        return ok(ApiCode.TASK_READ, service.get(user.userId(), projectId, taskId));
+        return ok(SuccessCode.TASK_READ, service.get(user.userId(), projectId, taskId));
     }
 
     @PatchMapping("/tasks/{taskId}")
     public ResponseEntity<ApiResponse<TaskData>> update(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @PathVariable long taskId,
             @RequestBody TaskContentRequest request) {
-        return ok(ApiCode.TASK_UPDATED, service.update(user.userId(), projectId, taskId, request));
+        return ok(SuccessCode.TASK_UPDATED, service.update(user.userId(), projectId, taskId, request));
     }
 
     @PatchMapping("/tasks/{taskId}/priority")
     public ResponseEntity<ApiResponse<TaskData>> updatePriority(
             @AuthenticationPrincipal AuthenticatedUser user, @PathVariable long projectId,
             @PathVariable long taskId, @RequestBody TaskPriorityRequest request) {
-        return ok(ApiCode.TASK_UPDATED,
+        return ok(SuccessCode.TASK_UPDATED,
                 service.updatePriority(user.userId(), projectId, taskId, request));
     }
 
@@ -86,7 +87,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskData>> updateDates(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @PathVariable long taskId,
             @RequestBody TaskDatesRequest request) {
-        return ok(ApiCode.TASK_DATES_UPDATED,
+        return ok(SuccessCode.TASK_DATES_UPDATED,
                 service.updateDates(user.userId(), projectId, taskId, request));
     }
 
@@ -94,7 +95,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskService.MoveResult>> changeStatus(
             @AuthenticationPrincipal AuthenticatedUser user, @PathVariable long projectId,
             @PathVariable long taskId, @RequestBody TaskStatusRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.TASK_MOVED,
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.TASK_MOVED,
                 service.changeStatus(user.userId(), projectId, taskId, request)));
     }
 
@@ -102,7 +103,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskService.MoveResult>> movePosition(
             @AuthenticationPrincipal AuthenticatedUser user, @PathVariable long projectId,
             @PathVariable long taskId, @RequestBody TaskPositionRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.TASK_MOVED,
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.TASK_MOVED,
                 service.movePosition(user.userId(), projectId, taskId, request)));
     }
 
@@ -110,7 +111,7 @@ public class TaskController {
     public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @PathVariable long taskId) {
         service.delete(user.userId(), projectId, taskId);
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.TASK_DELETED, null));
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.TASK_DELETED, null));
     }
 
     private ResponseEntity<ApiResponse<TaskData>> ok(ApiCode code, TaskResponse task) {

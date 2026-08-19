@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.dewevrei.aikanban.boardcolumn.ColumnResponse;
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.common.validation.UserInputValidator;
 import com.dewevrei.aikanban.domain.BoardColumn;
@@ -48,21 +49,21 @@ public class ProjectService {
     @Transactional
     public CreatedProject create(long userId, ProjectRequest request) {
         validateEnvelope(request);
-        String name = UserInputValidator.required(request.name(), 100, ApiCode.INVALID_PROJECT_NAME);
+        String name = UserInputValidator.required(request.name(), 100, ErrorCode.INVALID_PROJECT_NAME);
         String description = UserInputValidator.optional(request.description(), 2000,
-                ApiCode.INVALID_PROJECT_DESCRIPTION);
+                ErrorCode.INVALID_PROJECT_DESCRIPTION);
         if (projectRepository.existsByUserIdAndNameIgnoreCase(userId, name)) {
-            throw new DomainException(ApiCode.DUPLICATE_PROJECT_NAME);
+            throw new DomainException(ErrorCode.DUPLICATE_PROJECT_NAME);
         }
         User owner = userRepository.findById(userId)
-                .orElseThrow(() -> new DomainException(ApiCode.AUTHENTICATION_REQUIRED));
+                .orElseThrow(() -> new DomainException(ErrorCode.AUTHENTICATION_REQUIRED));
         Project project;
         try {
             project = projectRepository.saveAndFlush(new Project(owner, name, description));
         } catch (DataIntegrityViolationException exception) {
-            throw new DomainException(ApiCode.DUPLICATE_PROJECT_NAME, exception);
+            throw new DomainException(ErrorCode.DUPLICATE_PROJECT_NAME, exception);
         } catch (RuntimeException exception) {
-            throw new DomainException(ApiCode.PROJECT_CREATE_FAILED, exception);
+            throw new DomainException(ErrorCode.PROJECT_CREATE_FAILED, exception);
         }
 
         List<BoardColumn> columns = DEFAULT_COLUMNS.stream()
@@ -71,7 +72,7 @@ public class ProjectService {
         try {
             columns = columnRepository.saveAllAndFlush(columns);
         } catch (RuntimeException exception) {
-            throw new DomainException(ApiCode.PROJECT_CREATE_FAILED, exception);
+            throw new DomainException(ErrorCode.PROJECT_CREATE_FAILED, exception);
         }
         return new CreatedProject(ProjectResponse.from(project),
                 columns.stream().map(column -> ColumnResponse.from(column, 0)).toList());
@@ -80,18 +81,18 @@ public class ProjectService {
     @Transactional
     public ProjectResponse update(long userId, long projectId, ProjectRequest request) {
         validateEnvelope(request);
-        String name = UserInputValidator.required(request.name(), 100, ApiCode.INVALID_PROJECT_NAME);
+        String name = UserInputValidator.required(request.name(), 100, ErrorCode.INVALID_PROJECT_NAME);
         String description = UserInputValidator.optional(request.description(), 2000,
-                ApiCode.INVALID_PROJECT_DESCRIPTION);
+                ErrorCode.INVALID_PROJECT_DESCRIPTION);
         Project project = owned(userId, projectId);
         if (projectRepository.existsByUserIdAndNameIgnoreCaseAndIdNot(userId, name, projectId)) {
-            throw new DomainException(ApiCode.DUPLICATE_PROJECT_NAME);
+            throw new DomainException(ErrorCode.DUPLICATE_PROJECT_NAME);
         }
         project.update(name, description);
         try {
             return ProjectResponse.from(projectRepository.saveAndFlush(project));
         } catch (DataIntegrityViolationException exception) {
-            throw new DomainException(ApiCode.DUPLICATE_PROJECT_NAME, exception);
+            throw new DomainException(ErrorCode.DUPLICATE_PROJECT_NAME, exception);
         }
     }
 
@@ -102,18 +103,18 @@ public class ProjectService {
             projectRepository.delete(project);
             projectRepository.flush();
         } catch (RuntimeException exception) {
-            throw new DomainException(ApiCode.PROJECT_DELETE_FAILED, exception);
+            throw new DomainException(ErrorCode.PROJECT_DELETE_FAILED, exception);
         }
     }
 
     private Project owned(long userId, long projectId) {
         return projectRepository.findByIdAndUserId(projectId, userId)
-                .orElseThrow(() -> new DomainException(ApiCode.PROJECT_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
     private void validateEnvelope(ProjectRequest request) {
-        if (request == null || request.hasUnknownField()) throw new DomainException(ApiCode.INVALID_REQUEST);
-        if (request.hasReadOnlyField()) throw new DomainException(ApiCode.READ_ONLY_FIELD);
+        if (request == null || request.hasUnknownField()) throw new DomainException(ErrorCode.INVALID_REQUEST);
+        if (request.hasReadOnlyField()) throw new DomainException(ErrorCode.READ_ONLY_FIELD);
     }
 
     public record CreatedProject(ProjectResponse project, List<ColumnResponse> columns) {}

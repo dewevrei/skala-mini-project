@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dewevrei.aikanban.auth.AuthenticatedUser;
 import com.dewevrei.aikanban.boardcolumn.ColumnResponse;
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.SuccessCode;
 import com.dewevrei.aikanban.common.api.ApiResponse;
 
 @RestController
@@ -27,27 +28,27 @@ public class ProjectController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<ProjectListData>> list(@AuthenticationPrincipal AuthenticatedUser user) {
-        return ok(ApiCode.PROJECT_LISTED, new ProjectListData(service.list(user.userId())));
+        return ok(SuccessCode.PROJECT_LISTED, new ProjectListData(service.list(user.userId())));
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse<ProjectData>> create(@AuthenticationPrincipal AuthenticatedUser user,
             @RequestBody ProjectRequest request) {
         ProjectService.CreatedProject created = service.create(user.userId(), request);
-        return ResponseEntity.status(ApiCode.PROJECT_CREATED.status()).body(ApiResponse.success(
-                ApiCode.PROJECT_CREATED, new ProjectData(created.project(), created.columns())));
+        return ResponseEntity.status(SuccessCode.PROJECT_CREATED.status()).body(ApiResponse.success(
+                SuccessCode.PROJECT_CREATED, new ProjectData(created.project(), created.columns())));
     }
 
     @GetMapping("/{projectId}")
     public ResponseEntity<ApiResponse<ProjectOnlyData>> get(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId) {
-        return ok(ApiCode.PROJECT_READ, new ProjectOnlyData(service.get(user.userId(), projectId)));
+        return ok(SuccessCode.PROJECT_READ, new ProjectOnlyData(service.get(user.userId(), projectId)));
     }
 
     @PatchMapping("/{projectId}")
     public ResponseEntity<ApiResponse<ProjectOnlyData>> update(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId, @RequestBody ProjectRequest request) {
-        return ok(ApiCode.PROJECT_UPDATED,
+        return ok(SuccessCode.PROJECT_UPDATED,
                 new ProjectOnlyData(service.update(user.userId(), projectId, request)));
     }
 
@@ -55,7 +56,7 @@ public class ProjectController {
     public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable long projectId) {
         service.delete(user.userId(), projectId);
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.PROJECT_DELETED, null));
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.PROJECT_DELETED, null));
     }
 
     private <T> ResponseEntity<ApiResponse<T>> ok(ApiCode code, T data) {

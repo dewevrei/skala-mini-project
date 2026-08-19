@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dewevrei.aikanban.auth.AuthenticatedUser;
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.SuccessCode;
 import com.dewevrei.aikanban.common.api.ApiResponse;
 
 @RestController
@@ -27,7 +28,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<ApiResponse<Map<String, UserResponse>>> me(
             @AuthenticationPrincipal AuthenticatedUser principal) {
-        return success(ApiCode.USER_READ, principal.userId());
+        return success(SuccessCode.USER_READ, principal.userId());
     }
 
     @PatchMapping("/nickname")
@@ -36,7 +37,7 @@ public class UserController {
             @RequestBody UpdateNicknameRequest request) {
         UserResponse user = UserResponse.from(userService.updateNickname(principal.userId(),
                 request == null ? null : request.nickname()));
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.USER_UPDATED, Map.of("user", user)));
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.USER_UPDATED, Map.of("user", user)));
     }
 
     private ResponseEntity<ApiResponse<Map<String, UserResponse>>> success(ApiCode code, long userId) {

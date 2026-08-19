@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import org.junit.jupiter.api.Test;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.SuccessCode;
 import com.dewevrei.aikanban.common.api.ApiResponse;
 
 import tools.jackson.databind.ObjectMapper;
@@ -42,7 +43,7 @@ class SeoulTimeMapperTest {
                 LocalDateTime.of(2026, 8, 18, 12, 30, 15, 123_456_000));
 
         String json = objectMapper.writeValueAsString(
-                ApiResponse.success(ApiCode.TASK_READ, new TimestampPayload(timestamp)));
+                ApiResponse.success(SuccessCode.TASK_READ, new TimestampPayload(timestamp)));
 
         assertThat(json).contains("\"timestamp\":\"2026-08-18T12:30:15.123456+09:00\"");
     }

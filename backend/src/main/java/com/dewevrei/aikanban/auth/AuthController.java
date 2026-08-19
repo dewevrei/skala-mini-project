@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.SuccessCode;
 import com.dewevrei.aikanban.common.api.ApiResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +28,7 @@ public class AuthController {
 
     @GetMapping("/csrf")
     public ResponseEntity<ApiResponse<Map<String, String>>> csrf(CsrfToken csrfToken) {
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.CSRF_TOKEN_ISSUED,
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.CSRF_TOKEN_ISSUED,
                 Map.of("token", csrfToken.getToken(), "headerName", csrfToken.getHeaderName())));
     }
 
@@ -40,7 +41,7 @@ public class AuthController {
         } finally {
             expireSessionCookie(response);
         }
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.LOGOUT_SUCCEEDED, null));
+        return ResponseEntity.ok(ApiResponse.success(SuccessCode.LOGOUT_SUCCEEDED, null));
     }
 
     public static void expireSessionCookie(HttpServletResponse response) {

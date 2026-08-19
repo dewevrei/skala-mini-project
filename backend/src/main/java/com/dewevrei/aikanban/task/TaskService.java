@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.dewevrei.aikanban.boardcolumn.ColumnResponse;
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.common.validation.UserInputValidator;
 import com.dewevrei.aikanban.domain.BoardColumn;
@@ -41,9 +42,9 @@ public class TaskService {
     @Transactional
     public TaskResponse create(long userId, long projectId, long columnId, TaskContentRequest request) {
         validateContentEnvelope(request);
-        String title = UserInputValidator.required(request.title(), 200, ApiCode.INVALID_TASK_TITLE);
+        String title = UserInputValidator.required(request.title(), 200, ErrorCode.INVALID_TASK_TITLE);
         String description = UserInputValidator.optional(request.description(), 5000,
-                ApiCode.INVALID_TASK_DESCRIPTION);
+                ErrorCode.INVALID_TASK_DESCRIPTION);
         lockedOwnedProject(userId, projectId);
         ownedColumn(userId, projectId, columnId);
         List<Task> current = orderedTasks(projectId, columnId);
@@ -60,9 +61,9 @@ public class TaskService {
     @Transactional
     public TaskResponse update(long userId, long projectId, long taskId, TaskContentRequest request) {
         validateContentEnvelope(request);
-        String title = UserInputValidator.required(request.title(), 200, ApiCode.INVALID_TASK_TITLE);
+        String title = UserInputValidator.required(request.title(), 200, ErrorCode.INVALID_TASK_TITLE);
         String description = UserInputValidator.optional(request.description(), 5000,
-                ApiCode.INVALID_TASK_DESCRIPTION);
+                ErrorCode.INVALID_TASK_DESCRIPTION);
         ownedProject(userId, projectId);
         Task task = ownedTask(userId, projectId, taskId);
         task.updateContent(title, description);
@@ -73,7 +74,7 @@ public class TaskService {
     public TaskResponse updatePriority(long userId, long projectId, long taskId, TaskPriorityRequest request) {
         if (request == null || request.hasUnknownField() || request.priority() == null
                 || request.priority() < 1 || request.priority() > 5) {
-            throw new DomainException(ApiCode.INVALID_TASK_PRIORITY);
+            throw new DomainException(ErrorCode.INVALID_TASK_PRIORITY);
         }
         ownedProject(userId, projectId);
         Task task = ownedTask(userId, projectId, taskId);
@@ -84,7 +85,7 @@ public class TaskService {
     @Transactional
     public TaskResponse updateDates(long userId, long projectId, long taskId, TaskDatesRequest request) {
         if (request == null || request.hasUnknownField() || !request.hasBothKeys()) {
-            throw new DomainException(ApiCode.INVALID_TASK_DATE);
+            throw new DomainException(ErrorCode.INVALID_TASK_DATE);
         }
         LocalDate startDate = parseDate(request.startDate());
         LocalDate endDate = parseDate(request.endDate());
@@ -106,7 +107,7 @@ public class TaskService {
             taskRepository.saveAll(remaining);
             taskRepository.flush();
         } catch (RuntimeException exception) {
-            throw new DomainException(ApiCode.TASK_DELETE_FAILED, exception);
+            throw new DomainException(ErrorCode.TASK_DELETE_FAILED, exception);
         }
     }
 
@@ -119,7 +120,7 @@ public class TaskService {
 
     public BoardData items(long userId, long projectId, String titleQuery) {
         Project project = ownedProject(userId, projectId);
-        String query = UserInputValidator.optional(titleQuery, 200, ApiCode.INVALID_SEARCH_QUERY);
+        String query = UserInputValidator.optional(titleQuery, 200, ErrorCode.INVALID_SEARCH_QUERY);
         List<BoardColumn> columns = orderedColumns(projectId);
         List<Task> tasks = query == null || query.isEmpty()
                 ? taskRepository.findAllForItems(projectId)
@@ -130,7 +131,7 @@ public class TaskService {
     @Transactional
     public MoveResult changeStatus(long userId, long projectId, long taskId, TaskStatusRequest request) {
         if (request == null || request.hasUnknownField() || request.targetColumnId() == null) {
-            throw new DomainException(ApiCode.INVALID_TASK_MOVE);
+            throw new DomainException(ErrorCode.INVALID_TASK_MOVE);
         }
         return move(userId, projectId, taskId, request.targetColumnId(), null);
     }
@@ -139,7 +140,7 @@ public class TaskService {
     public MoveResult movePosition(long userId, long projectId, long taskId, TaskPositionRequest request) {
         if (request == null || request.hasUnknownField() || request.targetColumnId() == null
                 || (request.beforeTaskId() != null && request.beforeTaskId().equals(taskId))) {
-            throw new DomainException(ApiCode.INVALID_TASK_MOVE);
+            throw new DomainException(ErrorCode.INVALID_TASK_MOVE);
         }
         return move(userId, projectId, taskId, request.targetColumnId(), request.beforeTaskId());
     }
@@ -159,13 +160,13 @@ public class TaskService {
                 ? source
                 : new ArrayList<>(orderedTasks(projectId, targetColumnId));
         if (!source.removeIf(candidate -> candidate.getId().equals(taskId))) {
-            throw new DomainException(ApiCode.INVALID_TASK_MOVE);
+            throw new DomainException(ErrorCode.INVALID_TASK_MOVE);
         }
 
         int insertionIndex = target.size();
         if (beforeTaskId != null) {
             insertionIndex = indexOf(target, beforeTaskId);
-            if (insertionIndex < 0) throw new DomainException(ApiCode.INVALID_TASK_MOVE);
+            if (insertionIndex < 0) throw new DomainException(ErrorCode.INVALID_TASK_MOVE);
         }
         target.add(insertionIndex, task);
 
@@ -217,11 +218,11 @@ public class TaskService {
 
     private LocalDate parseDate(String value) {
         if (value == null) return null;
-        if (!value.matches("\\d{4}-\\d{2}-\\d{2}")) throw new DomainException(ApiCode.INVALID_TASK_DATE);
+        if (!value.matches("\\d{4}-\\d{2}-\\d{2}")) throw new DomainException(ErrorCode.INVALID_TASK_DATE);
         try {
             return LocalDate.parse(value);
         } catch (DateTimeParseException exception) {
-            throw new DomainException(ApiCode.INVALID_TASK_DATE, exception);
+            throw new DomainException(ErrorCode.INVALID_TASK_DATE, exception);
         }
     }
 
@@ -230,28 +231,28 @@ public class TaskService {
     }
 
     private void validateContentEnvelope(TaskContentRequest request) {
-        if (request == null || request.hasUnknownField()) throw new DomainException(ApiCode.INVALID_REQUEST);
-        if (request.hasReadOnlyField()) throw new DomainException(ApiCode.READ_ONLY_FIELD);
+        if (request == null || request.hasUnknownField()) throw new DomainException(ErrorCode.INVALID_REQUEST);
+        if (request.hasReadOnlyField()) throw new DomainException(ErrorCode.READ_ONLY_FIELD);
     }
 
     private Project ownedProject(long userId, long projectId) {
         return projectRepository.findByIdAndUserId(projectId, userId)
-                .orElseThrow(() -> new DomainException(ApiCode.PROJECT_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
     private Project lockedOwnedProject(long userId, long projectId) {
         return projectRepository.findWithLockByIdAndUserId(projectId, userId)
-                .orElseThrow(() -> new DomainException(ApiCode.PROJECT_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
     private BoardColumn ownedColumn(long userId, long projectId, long columnId) {
         return columnRepository.findByIdAndProjectIdAndProjectUserId(columnId, projectId, userId)
-                .orElseThrow(() -> new DomainException(ApiCode.COLUMN_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(ErrorCode.COLUMN_NOT_FOUND));
     }
 
     private Task ownedTask(long userId, long projectId, long taskId) {
         return taskRepository.findOwned(taskId, projectId, userId)
-                .orElseThrow(() -> new DomainException(ApiCode.TASK_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(ErrorCode.TASK_NOT_FOUND));
     }
 
     private List<BoardColumn> orderedColumns(long projectId) {

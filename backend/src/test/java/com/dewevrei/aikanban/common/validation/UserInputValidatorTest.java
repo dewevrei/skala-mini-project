@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 
 class UserInputValidatorTest {
@@ -52,8 +53,8 @@ class UserInputValidatorTest {
 
     @Test
     void 서비스가_지정한_도메인_오류_코드로_변환할_수_있다() {
-        assertThatThrownBy(() -> UserInputValidator.required("  ", 100, ApiCode.INVALID_PROJECT_NAME))
+        assertThatThrownBy(() -> UserInputValidator.required("  ", 100, ErrorCode.INVALID_PROJECT_NAME))
                 .isInstanceOfSatisfying(DomainException.class,
-                        exception -> assertThat(exception.getCode()).isEqualTo(ApiCode.INVALID_PROJECT_NAME));
+                        exception -> assertThat(exception.getCode()).isEqualTo(ErrorCode.INVALID_PROJECT_NAME));
     }
 }

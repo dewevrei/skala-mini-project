@@ -21,6 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.domain.BoardColumn;
 import com.dewevrei.aikanban.domain.Project;
@@ -70,7 +71,7 @@ class ProjectServiceTest {
         when(projects.saveAndFlush(any())).thenAnswer(call -> id(call.getArgument(0), 10L));
         when(columns.saveAllAndFlush(any())).thenThrow(new IllegalStateException("db"));
 
-        assertCode(ApiCode.PROJECT_CREATE_FAILED,
+        assertCode(ErrorCode.PROJECT_CREATE_FAILED,
                 () -> service.create(1L, new ProjectRequest("프로젝트", null)));
     }
 
@@ -86,10 +87,10 @@ class ProjectServiceTest {
     @Test
     void 타인_Project는_존재를_숨기고_이름은_owner_범위에서_대소문자_없이_중복검사한다() {
         when(projects.findByIdAndUserId(9L, 1L)).thenReturn(Optional.empty());
-        assertCode(ApiCode.PROJECT_NOT_FOUND, () -> service.get(1L, 9L));
+        assertCode(ErrorCode.PROJECT_NOT_FOUND, () -> service.get(1L, 9L));
 
         when(projects.existsByUserIdAndNameIgnoreCase(1L, "alpha")).thenReturn(true);
-        assertCode(ApiCode.DUPLICATE_PROJECT_NAME,
+        assertCode(ErrorCode.DUPLICATE_PROJECT_NAME,
                 () -> service.create(1L, new ProjectRequest(" alpha ", null)));
     }
 

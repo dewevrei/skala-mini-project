@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.common.validation.UserInputValidator;
 import com.dewevrei.aikanban.domain.BoardColumn;
@@ -34,10 +35,10 @@ public class BoardColumnService {
     @Transactional
     public ColumnResponse create(long userId, long projectId, ColumnRequest request) {
         validate(request);
-        String name = UserInputValidator.required(request.name(), 50, ApiCode.INVALID_COLUMN_NAME);
+        String name = UserInputValidator.required(request.name(), 50, ErrorCode.INVALID_COLUMN_NAME);
         Project project = lockedOwnedProject(userId, projectId);
         if (columnRepository.existsByProjectIdAndNameIgnoreCase(projectId, name)) {
-            throw new DomainException(ApiCode.DUPLICATE_COLUMN_NAME);
+            throw new DomainException(ErrorCode.DUPLICATE_COLUMN_NAME);
         }
         List<BoardColumn> current = ordered(projectId);
         int next = current.stream().mapToInt(BoardColumn::getSortOrder).max().orElse(0) + 1;
@@ -45,24 +46,24 @@ public class BoardColumnService {
             BoardColumn saved = columnRepository.saveAndFlush(new BoardColumn(project, name, next));
             return ColumnResponse.from(saved, 0);
         } catch (DataIntegrityViolationException exception) {
-            throw new DomainException(ApiCode.DUPLICATE_COLUMN_NAME, exception);
+            throw new DomainException(ErrorCode.DUPLICATE_COLUMN_NAME, exception);
         }
     }
 
     @Transactional
     public ColumnResponse update(long userId, long projectId, long columnId, ColumnRequest request) {
         validate(request);
-        String name = UserInputValidator.required(request.name(), 50, ApiCode.INVALID_COLUMN_NAME);
+        String name = UserInputValidator.required(request.name(), 50, ErrorCode.INVALID_COLUMN_NAME);
         ownedProject(userId, projectId);
         BoardColumn column = ownedColumn(userId, projectId, columnId);
         if (columnRepository.existsByProjectIdAndNameIgnoreCaseAndIdNot(projectId, name, columnId)) {
-            throw new DomainException(ApiCode.DUPLICATE_COLUMN_NAME);
+            throw new DomainException(ErrorCode.DUPLICATE_COLUMN_NAME);
         }
         column.rename(name);
         try {
             column = columnRepository.saveAndFlush(column);
         } catch (DataIntegrityViolationException exception) {
-            throw new DomainException(ApiCode.DUPLICATE_COLUMN_NAME, exception);
+            throw new DomainException(ErrorCode.DUPLICATE_COLUMN_NAME, exception);
         }
         return response(column);
     }
@@ -75,12 +76,12 @@ public class BoardColumnService {
         List<Long> ids = request.orderedColumnIds();
         if (ids == null || ids.isEmpty() || ids.stream().anyMatch(id -> id == null)
                 || ids.size() != columns.size()) {
-            throw new DomainException(ApiCode.INVALID_COLUMN_ORDER);
+            throw new DomainException(ErrorCode.INVALID_COLUMN_ORDER);
         }
         Set<Long> requested = new HashSet<>(ids);
         Set<Long> current = columns.stream().map(BoardColumn::getId).collect(java.util.stream.Collectors.toSet());
         if (requested.size() != ids.size() || !requested.equals(current)) {
-            throw new DomainException(ApiCode.INVALID_COLUMN_ORDER);
+            throw new DomainException(ErrorCode.INVALID_COLUMN_ORDER);
         }
         var byId = columns.stream().collect(java.util.stream.Collectors.toMap(BoardColumn::getId, c -> c));
         for (int index = 0; index < ids.size(); index++) {
@@ -95,29 +96,29 @@ public class BoardColumnService {
         lockedOwnedProject(userId, projectId);
         BoardColumn column = ownedColumn(userId, projectId, columnId);
         if (columnRepository.countByProjectId(projectId) <= 1) {
-            throw new DomainException(ApiCode.LAST_COLUMN_DELETE_FORBIDDEN);
+            throw new DomainException(ErrorCode.LAST_COLUMN_DELETE_FORBIDDEN);
         }
         try {
             columnRepository.delete(column);
             columnRepository.flush();
         } catch (RuntimeException exception) {
-            throw new DomainException(ApiCode.COLUMN_DELETE_FAILED, exception);
+            throw new DomainException(ErrorCode.COLUMN_DELETE_FAILED, exception);
         }
     }
 
     private Project ownedProject(long userId, long projectId) {
         return projectRepository.findByIdAndUserId(projectId, userId)
-                .orElseThrow(() -> new DomainException(ApiCode.PROJECT_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
     private Project lockedOwnedProject(long userId, long projectId) {
         return projectRepository.findWithLockByIdAndUserId(projectId, userId)
-                .orElseThrow(() -> new DomainException(ApiCode.PROJECT_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
     private BoardColumn ownedColumn(long userId, long projectId, long columnId) {
         return columnRepository.findByIdAndProjectIdAndProjectUserId(columnId, projectId, userId)
-                .orElseThrow(() -> new DomainException(ApiCode.COLUMN_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(ErrorCode.COLUMN_NOT_FOUND));
     }
 
     private List<BoardColumn> ordered(long projectId) {
@@ -129,12 +130,12 @@ public class BoardColumnService {
     }
 
     private void validate(ColumnRequest request) {
-        if (request == null || request.hasUnknownField()) throw new DomainException(ApiCode.INVALID_REQUEST);
-        if (request.hasReadOnlyField()) throw new DomainException(ApiCode.READ_ONLY_FIELD);
+        if (request == null || request.hasUnknownField()) throw new DomainException(ErrorCode.INVALID_REQUEST);
+        if (request.hasReadOnlyField()) throw new DomainException(ErrorCode.READ_ONLY_FIELD);
     }
 
     private void validate(ReorderColumnsRequest request) {
-        if (request == null || request.hasUnknownField()) throw new DomainException(ApiCode.INVALID_REQUEST);
-        if (request.hasReadOnlyField()) throw new DomainException(ApiCode.READ_ONLY_FIELD);
+        if (request == null || request.hasUnknownField()) throw new DomainException(ErrorCode.INVALID_REQUEST);
+        if (request.hasReadOnlyField()) throw new DomainException(ErrorCode.READ_ONLY_FIELD);
     }
 }

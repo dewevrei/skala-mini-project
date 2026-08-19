@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.domain.Project;
 import com.dewevrei.aikanban.repository.ProjectRepository;
@@ -95,9 +96,9 @@ class AiTaskServiceTest {
         owned();
         when(generator.generate("original", "requirement")).thenReturn(generated);
         when(persistence.saveBatch(1L, 10L, "original", generated))
-                .thenThrow(new DomainException(ApiCode.TASK_BATCH_SAVE_FAILED));
+                .thenThrow(new DomainException(ErrorCode.TASK_BATCH_SAVE_FAILED));
 
-        assertCode(ApiCode.TASK_BATCH_SAVE_FAILED,
+        assertCode(ErrorCode.TASK_BATCH_SAVE_FAILED,
                 () -> service.generate(1L, 10L, new AiGenerateRequest("original", "requirement")));
         verify(persistence, never()).saveFallback(1L, 10L, "original", "requirement");
     }
@@ -108,31 +109,31 @@ class AiTaskServiceTest {
         when(generator.generate("original", "requirement"))
                 .thenThrow(new AiGenerationException("transport", new RuntimeException()));
         when(persistence.saveFallback(1L, 10L, "original", "requirement"))
-                .thenThrow(new DomainException(ApiCode.TASK_FALLBACK_SAVE_FAILED));
+                .thenThrow(new DomainException(ErrorCode.TASK_FALLBACK_SAVE_FAILED));
 
-        assertCode(ApiCode.TASK_FALLBACK_SAVE_FAILED,
+        assertCode(ErrorCode.TASK_FALLBACK_SAVE_FAILED,
                 () -> service.generate(1L, 10L, new AiGenerateRequest("original", "requirement")));
         verify(generator).generate("original", "requirement");
     }
 
     @Test
     void 입력과_소유권을_AI호출전에_검증한다() {
-        assertCode(ApiCode.INVALID_TASK_TITLE,
+        assertCode(ErrorCode.INVALID_TASK_TITLE,
                 () -> service.generate(1L, 10L, new AiGenerateRequest(" ", "description")));
-        assertCode(ApiCode.INVALID_AI_DESCRIPTION,
+        assertCode(ErrorCode.INVALID_AI_DESCRIPTION,
                 () -> service.generate(1L, 10L, new AiGenerateRequest("title", " ")));
-        assertCode(ApiCode.INVALID_TASK_TITLE,
+        assertCode(ErrorCode.INVALID_TASK_TITLE,
                 () -> service.generate(1L, 10L, new AiGenerateRequest("bad\u0001", "description")));
-        assertCode(ApiCode.INVALID_TASK_TITLE,
+        assertCode(ErrorCode.INVALID_TASK_TITLE,
                 () -> service.generate(1L, 10L, new AiGenerateRequest("x".repeat(201), "description")));
-        assertCode(ApiCode.INVALID_AI_DESCRIPTION,
+        assertCode(ErrorCode.INVALID_AI_DESCRIPTION,
                 () -> service.generate(1L, 10L, new AiGenerateRequest("title", "x".repeat(5001))));
         AiGenerateRequest extra = new AiGenerateRequest("title", "description");
         extra.captureUnknown("extra", true);
-        assertCode(ApiCode.INVALID_REQUEST, () -> service.generate(1L, 10L, extra));
+        assertCode(ErrorCode.INVALID_REQUEST, () -> service.generate(1L, 10L, extra));
 
         when(projects.findByIdAndUserId(10L, 1L)).thenReturn(Optional.empty());
-        assertCode(ApiCode.PROJECT_NOT_FOUND,
+        assertCode(ErrorCode.PROJECT_NOT_FOUND,
                 () -> service.generate(1L, 10L, new AiGenerateRequest("title", "description")));
         verify(generator, never()).generate(org.mockito.ArgumentMatchers.anyString(),
                 org.mockito.ArgumentMatchers.anyString());

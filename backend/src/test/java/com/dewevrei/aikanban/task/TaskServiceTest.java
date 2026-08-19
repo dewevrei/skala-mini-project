@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.domain.BoardColumn;
 import com.dewevrei.aikanban.domain.Project;
@@ -70,12 +71,12 @@ class TaskServiceTest {
     @Test
     void 생성은_Project와_Column_소유권_및_경로_일치를_검사한다() {
         when(projects.findWithLockByIdAndUserId(10L, 1L)).thenReturn(Optional.empty());
-        assertCode(ApiCode.PROJECT_NOT_FOUND, () -> service.create(1L, 10L, 100L,
+        assertCode(ErrorCode.PROJECT_NOT_FOUND, () -> service.create(1L, 10L, 100L,
                 new TaskContentRequest("task", null)));
 
         when(projects.findWithLockByIdAndUserId(10L, 1L)).thenReturn(Optional.of(project));
         when(columns.findByIdAndProjectIdAndProjectUserId(100L, 10L, 1L)).thenReturn(Optional.empty());
-        assertCode(ApiCode.COLUMN_NOT_FOUND, () -> service.create(1L, 10L, 100L,
+        assertCode(ErrorCode.COLUMN_NOT_FOUND, () -> service.create(1L, 10L, 100L,
                 new TaskContentRequest("task", null)));
     }
 
@@ -83,11 +84,11 @@ class TaskServiceTest {
     void 생성과_수정은_읽기전용_필드를_조용히_무시하지_않는다() {
         TaskContentRequest create = new TaskContentRequest("task", null);
         create.captureUnknown("priority", 5);
-        assertCode(ApiCode.READ_ONLY_FIELD, () -> service.create(1L, 10L, 100L, create));
+        assertCode(ErrorCode.READ_ONLY_FIELD, () -> service.create(1L, 10L, 100L, create));
 
         TaskContentRequest update = new TaskContentRequest("task", null);
         update.captureUnknown("startDate", "2026-08-18");
-        assertCode(ApiCode.READ_ONLY_FIELD, () -> service.update(1L, 10L, 1L, update));
+        assertCode(ErrorCode.READ_ONLY_FIELD, () -> service.update(1L, 10L, 1L, update));
         verify(projects, never()).findByIdAndUserId(any(), any());
     }
 
@@ -117,9 +118,9 @@ class TaskServiceTest {
         TaskResponse result = service.updatePriority(1L, 10L, 1L, new TaskPriorityRequest(5));
 
         assertThat(result.priority()).isEqualTo(5);
-        assertCode(ApiCode.INVALID_TASK_PRIORITY,
+        assertCode(ErrorCode.INVALID_TASK_PRIORITY,
                 () -> service.updatePriority(1L, 10L, 1L, new TaskPriorityRequest(0)));
-        assertCode(ApiCode.INVALID_TASK_PRIORITY,
+        assertCode(ErrorCode.INVALID_TASK_PRIORITY,
                 () -> service.updatePriority(1L, 10L, 1L, new TaskPriorityRequest(null)));
     }
 
@@ -128,7 +129,7 @@ class TaskServiceTest {
         when(projects.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(project));
         when(tasks.findOwned(1L, 10L, 1L)).thenReturn(Optional.empty());
 
-        assertCode(ApiCode.TASK_NOT_FOUND, () -> service.get(1L, 10L, 1L));
+        assertCode(ErrorCode.TASK_NOT_FOUND, () -> service.get(1L, 10L, 1L));
     }
 
     @Test
@@ -151,9 +152,9 @@ class TaskServiceTest {
 
     @Test
     void 날짜의_두_key_누락과_잘못된_달력날짜를_거부한다() {
-        assertCode(ApiCode.INVALID_TASK_DATE,
+        assertCode(ErrorCode.INVALID_TASK_DATE,
                 () -> service.updateDates(1L, 10L, 1L, new TaskDatesRequest()));
-        assertCode(ApiCode.INVALID_TASK_DATE,
+        assertCode(ErrorCode.INVALID_TASK_DATE,
                 () -> service.updateDates(1L, 10L, 1L,
                         new TaskDatesRequest("2026-02-30", null)));
     }
@@ -204,7 +205,7 @@ class TaskServiceTest {
         service.items(1L, 10L, "   ");
         verify(tasks, org.mockito.Mockito.times(2)).findAllForItems(10L);
 
-        assertCode(ApiCode.INVALID_SEARCH_QUERY,
+        assertCode(ErrorCode.INVALID_SEARCH_QUERY,
                 () -> service.items(1L, 10L, "x".repeat(201)));
     }
 
@@ -290,16 +291,16 @@ class TaskServiceTest {
 
     @Test
     void 이동의_self_before_대상열에_없는_before와_다른_Project_열을_거부한다() {
-        assertCode(ApiCode.INVALID_TASK_MOVE, () -> service.movePosition(1L, 10L, 1L,
+        assertCode(ErrorCode.INVALID_TASK_MOVE, () -> service.movePosition(1L, 10L, 1L,
                 new TaskPositionRequest(100L, 1L)));
 
         Task moving = task(1L, 100L, 1L, "moving");
         stubMove(moving, todo, List.of(moving));
-        assertCode(ApiCode.INVALID_TASK_MOVE, () -> service.movePosition(1L, 10L, 1L,
+        assertCode(ErrorCode.INVALID_TASK_MOVE, () -> service.movePosition(1L, 10L, 1L,
                 new TaskPositionRequest(100L, 999L)));
 
         when(columns.findByIdAndProjectIdAndProjectUserId(999L, 10L, 1L)).thenReturn(Optional.empty());
-        assertCode(ApiCode.COLUMN_NOT_FOUND, () -> service.changeStatus(1L, 10L, 1L,
+        assertCode(ErrorCode.COLUMN_NOT_FOUND, () -> service.changeStatus(1L, 10L, 1L,
                 new TaskStatusRequest(999L)));
     }
 
@@ -319,7 +320,7 @@ class TaskServiceTest {
         assertThat(third.getSortOrder()).isEqualTo(2L);
 
         org.mockito.Mockito.doThrow(new RuntimeException("db")).when(tasks).flush();
-        assertCode(ApiCode.TASK_DELETE_FAILED, () -> service.delete(1L, 10L, 2L));
+        assertCode(ErrorCode.TASK_DELETE_FAILED, () -> service.delete(1L, 10L, 2L));
     }
 
     private void stubMove(Task moving, BoardColumn column, List<Task> ordered) {

@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.domain.BoardColumn;
 import com.dewevrei.aikanban.domain.Project;
@@ -81,7 +82,7 @@ class BoardColumnServiceTest {
         List<List<Long>> invalid = java.util.Arrays.asList(null, List.of(), List.of(100L, 100L),
                 List.of(100L), List.of(100L, 999L), List.of(100L, 101L, 999L));
         for (List<Long> ids : invalid) {
-            assertCode(ApiCode.INVALID_COLUMN_ORDER,
+            assertCode(ErrorCode.INVALID_COLUMN_ORDER,
                     () -> service.reorder(1L, 10L, new ReorderColumnsRequest(ids)));
         }
     }
@@ -110,7 +111,7 @@ class BoardColumnServiceTest {
         when(columns.findByIdAndProjectIdAndProjectUserId(100L, 10L, 1L)).thenReturn(Optional.of(only));
         when(columns.countByProjectId(10L)).thenReturn(1L);
 
-        assertCode(ApiCode.LAST_COLUMN_DELETE_FORBIDDEN, () -> service.delete(1L, 10L, 100L));
+        assertCode(ErrorCode.LAST_COLUMN_DELETE_FORBIDDEN, () -> service.delete(1L, 10L, 100L));
 
         verify(columns, never()).delete(any());
         verify(columns, never()).flush();
@@ -119,12 +120,12 @@ class BoardColumnServiceTest {
     @Test
     void 타인_Project와_Column은_각각_존재를_숨긴_오류를_반환한다() {
         when(projects.findWithLockByIdAndUserId(10L, 1L)).thenReturn(Optional.empty());
-        assertCode(ApiCode.PROJECT_NOT_FOUND,
+        assertCode(ErrorCode.PROJECT_NOT_FOUND,
                 () -> service.create(1L, 10L, new ColumnRequest("A")));
 
         when(projects.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(project));
         when(columns.findByIdAndProjectIdAndProjectUserId(100L, 10L, 1L)).thenReturn(Optional.empty());
-        assertCode(ApiCode.COLUMN_NOT_FOUND,
+        assertCode(ErrorCode.COLUMN_NOT_FOUND,
                 () -> service.update(1L, 10L, 100L, new ColumnRequest("A")));
     }
 

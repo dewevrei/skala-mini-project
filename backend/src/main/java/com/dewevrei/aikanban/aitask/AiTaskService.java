@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.common.validation.UserInputValidator;
 import com.dewevrei.aikanban.repository.ProjectRepository;
@@ -24,12 +25,12 @@ public class AiTaskService {
     }
 
     public List<TaskResponse> generate(long userId, long projectId, AiGenerateRequest request) {
-        if (request == null || request.hasUnknownField()) throw new DomainException(ApiCode.INVALID_REQUEST);
-        String title = required(request.title(), 200, ApiCode.INVALID_TASK_TITLE);
-        String description = required(request.description(), 5000, ApiCode.INVALID_AI_DESCRIPTION);
+        if (request == null || request.hasUnknownField()) throw new DomainException(ErrorCode.INVALID_REQUEST);
+        String title = required(request.title(), 200, ErrorCode.INVALID_TASK_TITLE);
+        String description = required(request.description(), 5000, ErrorCode.INVALID_AI_DESCRIPTION);
 
         projects.findByIdAndUserId(projectId, userId)
-                .orElseThrow(() -> new DomainException(ApiCode.PROJECT_NOT_FOUND));
+                .orElseThrow(() -> new DomainException(ErrorCode.PROJECT_NOT_FOUND));
 
         try {
             List<AiTaskItem> generated;

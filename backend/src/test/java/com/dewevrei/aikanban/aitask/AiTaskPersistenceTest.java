@@ -19,6 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.domain.BoardColumn;
 import com.dewevrei.aikanban.domain.Project;
@@ -82,18 +83,18 @@ class AiTaskPersistenceTest {
     void batch_DB실패와_fallback_DB실패를_각각_정확히_매핑한다() {
         context(List.of(column(101L, 1)), List.of());
         when(tasks.saveAllAndFlush(any())).thenThrow(new RuntimeException("db"));
-        assertCode(ApiCode.TASK_BATCH_SAVE_FAILED, () -> persistence.saveBatch(1L, 10L,
+        assertCode(ErrorCode.TASK_BATCH_SAVE_FAILED, () -> persistence.saveBatch(1L, 10L,
                 "title", List.of(new AiTaskItem("one", "detail", 1))));
 
         when(tasks.saveAndFlush(any())).thenThrow(new RuntimeException("db"));
-        assertCode(ApiCode.TASK_FALLBACK_SAVE_FAILED,
+        assertCode(ErrorCode.TASK_FALLBACK_SAVE_FAILED,
                 () -> persistence.saveFallback(1L, 10L, "title", "description"));
     }
 
     @Test
     void 저장시점에_소유권을_다시_확인하고_트랜잭션_경계를_저장에만_둔다() throws Exception {
         when(projects.findWithLockByIdAndUserId(10L, 1L)).thenReturn(Optional.empty());
-        assertCode(ApiCode.PROJECT_NOT_FOUND, () -> persistence.saveFallback(1L, 10L, "t", "d"));
+        assertCode(ErrorCode.PROJECT_NOT_FOUND, () -> persistence.saveFallback(1L, 10L, "t", "d"));
 
         Method generate = AiTaskService.class.getMethod("generate", long.class, long.class,
                 AiGenerateRequest.class);

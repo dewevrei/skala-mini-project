@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.common.validation.UserInputValidator;
 import com.dewevrei.aikanban.domain.User;
@@ -31,10 +32,10 @@ public class UserService {
     @Transactional
     public User synchronizeGoogleUser(GoogleProfile profile) {
         if (profile == null) {
-            throw new DomainException(ApiCode.OAUTH_PROFILE_INVALID);
+            throw new DomainException(ErrorCode.OAUTH_PROFILE_INVALID);
         }
-        String googleId = required(profile.googleId(), 255, ApiCode.OAUTH_PROFILE_INVALID);
-        String name = required(profile.name(), 255, ApiCode.OAUTH_PROFILE_INVALID);
+        String googleId = required(profile.googleId(), 255, ErrorCode.OAUTH_PROFILE_INVALID);
+        String name = required(profile.name(), 255, ErrorCode.OAUTH_PROFILE_INVALID);
         String email = validateEmail(profile.email(), profile.emailVerified());
 
         return userRepository.findByGoogleId(googleId)
@@ -44,39 +45,39 @@ public class UserService {
 
     public User getUser(long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new DomainException(ApiCode.AUTHENTICATION_REQUIRED));
+                .orElseThrow(() -> new DomainException(ErrorCode.AUTHENTICATION_REQUIRED));
     }
 
     @Transactional
     public User updateNickname(long userId, String requestedNickname) {
-        String nickname = required(requestedNickname, 100, ApiCode.INVALID_NICKNAME);
+        String nickname = required(requestedNickname, 100, ErrorCode.INVALID_NICKNAME);
         User user = getUser(userId);
         userRepository.findByNicknameIgnoreCase(nickname)
                 .filter(found -> !found.getId().equals(user.getId()))
-                .ifPresent(found -> { throw new DomainException(ApiCode.DUPLICATE_NICKNAME); });
+                .ifPresent(found -> { throw new DomainException(ErrorCode.DUPLICATE_NICKNAME); });
         user.updateNickname(nickname);
         try {
             return userRepository.saveAndFlush(user);
         } catch (DataIntegrityViolationException exception) {
-            throw new DomainException(ApiCode.DUPLICATE_NICKNAME, exception);
+            throw new DomainException(ErrorCode.DUPLICATE_NICKNAME, exception);
         }
     }
 
     private User updateExisting(User user, String name, String email) {
         userRepository.findByEmailIgnoreCase(email)
                 .filter(found -> !found.getId().equals(user.getId()))
-                .ifPresent(found -> { throw new DomainException(ApiCode.DUPLICATE_EMAIL); });
+                .ifPresent(found -> { throw new DomainException(ErrorCode.DUPLICATE_EMAIL); });
         user.updateGoogleProfile(name, email);
         try {
             return userRepository.saveAndFlush(user);
         } catch (DataIntegrityViolationException exception) {
-            throw new DomainException(ApiCode.DUPLICATE_EMAIL, exception);
+            throw new DomainException(ErrorCode.DUPLICATE_EMAIL, exception);
         }
     }
 
     private User createUser(String googleId, String name, String email) {
         if (userRepository.existsByEmailIgnoreCase(email)) {
-            throw new DomainException(ApiCode.DUPLICATE_EMAIL);
+            throw new DomainException(ErrorCode.DUPLICATE_EMAIL);
         }
         String nickname = null;
         for (int attempt = 0; attempt < NICKNAME_ATTEMPTS; attempt++) {
@@ -87,29 +88,29 @@ public class UserService {
             }
         }
         if (nickname == null) {
-            throw new DomainException(ApiCode.NICKNAME_GENERATION_FAILED);
+            throw new DomainException(ErrorCode.NICKNAME_GENERATION_FAILED);
         }
         try {
             return userRepository.saveAndFlush(new User(googleId, name, email, nickname));
         } catch (DataIntegrityViolationException exception) {
             String details = constraintDetails(exception);
             if (details.contains("uk_users_google_id") || details.contains("google_id")) {
-                throw new DomainException(ApiCode.DUPLICATE_GOOGLE_ID, exception);
+                throw new DomainException(ErrorCode.DUPLICATE_GOOGLE_ID, exception);
             }
             if (details.contains("uk_users_email") || details.contains("email")) {
-                throw new DomainException(ApiCode.DUPLICATE_EMAIL, exception);
+                throw new DomainException(ErrorCode.DUPLICATE_EMAIL, exception);
             }
-            throw new DomainException(ApiCode.NICKNAME_GENERATION_FAILED, exception);
+            throw new DomainException(ErrorCode.NICKNAME_GENERATION_FAILED, exception);
         }
     }
 
     private String validateEmail(String value, boolean verified) {
         if (!verified) {
-            throw new DomainException(ApiCode.OAUTH_EMAIL_INVALID);
+            throw new DomainException(ErrorCode.OAUTH_EMAIL_INVALID);
         }
-        String email = required(value, 320, ApiCode.OAUTH_EMAIL_INVALID);
+        String email = required(value, 320, ErrorCode.OAUTH_EMAIL_INVALID);
         if (!EMAIL.matcher(email).matches()) {
-            throw new DomainException(ApiCode.OAUTH_EMAIL_INVALID);
+            throw new DomainException(ErrorCode.OAUTH_EMAIL_INVALID);
         }
         return email;
     }

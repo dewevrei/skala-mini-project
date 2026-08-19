@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.dewevrei.aikanban.common.api.ApiCode;
+import com.dewevrei.aikanban.common.api.ErrorCode;
 import com.dewevrei.aikanban.common.exception.DomainException;
 import com.dewevrei.aikanban.domain.User;
 import com.dewevrei.aikanban.repository.UserRepository;
@@ -68,7 +69,7 @@ class UserServiceTest {
 
     @Test
     void 검증되지_않은_Google_email은_거부한다() {
-        assertCode(ApiCode.OAUTH_EMAIL_INVALID, () -> userService.synchronizeGoogleUser(
+        assertCode(ErrorCode.OAUTH_EMAIL_INVALID, () -> userService.synchronizeGoogleUser(
                 new GoogleProfile("google-1", "이름", "user@example.com", false)));
     }
 
@@ -77,7 +78,7 @@ class UserServiceTest {
         when(userRepository.findByGoogleId("google-1")).thenReturn(Optional.empty());
         when(userRepository.existsByEmailIgnoreCase("USED@example.com")).thenReturn(true);
 
-        assertCode(ApiCode.DUPLICATE_EMAIL, () -> userService.synchronizeGoogleUser(
+        assertCode(ErrorCode.DUPLICATE_EMAIL, () -> userService.synchronizeGoogleUser(
                 new GoogleProfile("google-1", "이름", "USED@example.com", true)));
     }
 
@@ -99,7 +100,7 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(current));
         when(userRepository.findByNicknameIgnoreCase("nickname")).thenReturn(Optional.of(another));
 
-        assertCode(ApiCode.DUPLICATE_NICKNAME, () -> userService.updateNickname(1L, "nickname"));
+        assertCode(ErrorCode.DUPLICATE_NICKNAME, () -> userService.updateNickname(1L, "nickname"));
     }
 
     @Test
@@ -115,8 +116,8 @@ class UserServiceTest {
 
     @Test
     void nickname의_제어문자와_100자를_넘는_입력은_거부한다() {
-        assertCode(ApiCode.INVALID_NICKNAME, () -> userService.updateNickname(1L, "잘못\n된 이름"));
-        assertCode(ApiCode.INVALID_NICKNAME, () -> userService.updateNickname(1L, "가".repeat(101)));
+        assertCode(ErrorCode.INVALID_NICKNAME, () -> userService.updateNickname(1L, "잘못\n된 이름"));
+        assertCode(ErrorCode.INVALID_NICKNAME, () -> userService.updateNickname(1L, "가".repeat(101)));
     }
 
     @Test
@@ -125,7 +126,7 @@ class UserServiceTest {
         when(nicknameGenerator.generate("이름")).thenReturn("이미-사용중");
         when(userRepository.existsByNicknameIgnoreCase("이미-사용중")).thenReturn(true);
 
-        assertCode(ApiCode.NICKNAME_GENERATION_FAILED, () -> userService.synchronizeGoogleUser(
+        assertCode(ErrorCode.NICKNAME_GENERATION_FAILED, () -> userService.synchronizeGoogleUser(
                 new GoogleProfile("google-1", "이름", "user@example.com", true)));
     }
 
