@@ -11,7 +11,7 @@ EXPOSE 6379
 # PowerShell run (replace <redis-password> with the local password):
 # docker run -d `
 #   --name ai-kanban-redis `
-#   -e REDIS_PASSWORD='<redis-password>' `
+#   -e REDIS_PASSWORD='root1234!' `
 #   -p 6379:6379 `
 #   ai-kanban-redis:8.8
 #
